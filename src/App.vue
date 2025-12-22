@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import StorytellingMap from './components/StorytellingMap.vue'
 </script>
 
 <template>
-  <StorytellingMap />
+  <router-view />
 </template>
 
 <style scoped>
