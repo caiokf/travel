@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="2000px" height="1400px" viewBox="0 0 2000 1400">
+
+<!-- Background Ocean -->
+<rect width="2000" height="1400" fill="#d4dde6"/>
+
+<!-- Landmasses - Stylized Western Europe -->
+<g id="landmass">
+
+  <!-- Great Britain (background context) -->
+  <path fill="#c8d4d8" stroke="#a8b5ba" stroke-width="1"
+    d="M720,80 C750,60 820,50 870,70 C920,90 950,140 940,200
+       C930,260 900,320 860,350 C820,380 770,370 740,340
+       C710,310 690,260 700,200 C710,140 690,100 720,80 Z"/>
+
+  <!-- Ireland (background context) -->
+  <path fill="#c8d4d8" stroke="#a8b5ba" stroke-width="1"
+    d="M580,150 C620,130 670,140 690,180 C710,220 700,280 670,310
+       C640,340 590,340 560,310 C530,280 530,220 550,180 C570,140 540,170 580,150 Z"/>
+
+  <!-- France -->
+  <path id="france" fill="#FDFCEC" stroke="#a8b5ba" stroke-width="1.5"
+    d="M750,380 C800,360 900,340 1000,350 C1100,360 1180,400 1220,460
+       C1260,520 1280,600 1260,680 C1240,760 1180,820 1100,850
+       C1020,880 920,880 850,850 C780,820 720,760 700,680
+       C680,600 700,520 720,460 C740,400 700,400 750,380 Z"/>
+
+  <!-- Spain -->
+  <path id="spain" fill="#FDFCEC" stroke="#a8b5ba" stroke-width="1.5"
+    d="M300,680 C380,640 500,620 620,640 C740,660 840,720 880,800
+       C920,880 920,980 880,1060 C840,1140 760,1200 660,1220
+       C560,1240 440,1220 360,1160 C280,1100 240,1000 240,900
+       C240,800 220,720 300,680 Z"/>
+
+  <!-- Portugal -->
+  <path id="portugal" fill="#FDFCEC" stroke="#a8b5ba" stroke-width="1.5"
+    d="M140,680 C180,650 240,640 280,680 C320,720 320,800 300,880
+       C280,960 240,1040 200,1080 C160,1120 120,1120 100,1080
+       C80,1040 80,960 100,880 C120,800 100,710 140,680 Z"/>
+
+  <!-- Italy (partial, for context) -->
+  <path fill="#c8d4d8" stroke="#a8b5ba" stroke-width="1"
+    d="M1300,500 C1340,480 1400,500 1440,560 C1480,620 1500,700 1480,780
+       C1460,860 1400,920 1340,940 C1280,960 1220,920 1200,860
+       C1180,800 1200,720 1240,660 C1280,600 1260,520 1300,500 Z"/>
+
+  <!-- Switzerland (small) -->
+  <ellipse cx="1150" cy="480" rx="60" ry="40" fill="#e8edef" stroke="#a8b5ba" stroke-width="1"/>
+
+  <!-- Belgium/Netherlands area -->
+  <path fill="#c8d4d8" stroke="#a8b5ba" stroke-width="1"
+    d="M900,280 C940,260 1000,270 1040,300 C1080,330 1080,380 1050,400
+       C1020,420 960,420 920,400 C880,380 860,320 900,280 Z"/>
+
+  <!-- Germany (partial) -->
+  <path fill="#c8d4d8" stroke="#a8b5ba" stroke-width="1"
+    d="M1040,280 C1100,250 1180,260 1240,300 C1300,340 1340,420 1320,500
+       C1300,580 1240,620 1160,620 C1080,620 1020,580 1000,500
+       C980,420 980,310 1040,280 Z"/>
+
+</g>
+
+<!-- Pyrenees Mountains -->
+<g fill="#98a8ac" opacity="0.5">
+  <polygon points="700,720 720,680 740,720"/>
+  <polygon points="740,710 765,665 790,710"/>
+  <polygon points="780,715 800,675 820,715"/>
+  <polygon points="820,720 845,675 870,720"/>
+</g>
+
+<!-- Alps indication -->
+<g fill="#98a8ac" opacity="0.4">
+  <polygon points="1100,500 1120,460 1140,500"/>
+  <polygon points="1130,490 1155,445 1180,490"/>
+  <polygon points="1160,495 1180,455 1200,495"/>
+</g>
+
+<!-- Major Rivers (decorative) -->
+<g fill="none" stroke="#b8c8d0" stroke-width="2" opacity="0.5">
+  <!-- Loire -->
+  <path d="M680,600 Q800,580 900,620 Q950,640 920,700"/>
+  <!-- Rhône -->
+  <path d="M1050,500 Q1020,600 980,700 Q960,780 1000,850"/>
+  <!-- Tagus -->
+  <path d="M180,780 Q280,760 400,800"/>
+</g>
+
+<!-- City markers for context (small, muted) -->
+<g fill="#8a9a9e" opacity="0.4">
+  <circle cx="1380" cy="580" r="4"/> <!-- Rome -->
+  <circle cx="980" cy="320" r="4"/> <!-- Brussels -->
+  <circle cx="1200" cy="380" r="4"/> <!-- Frankfurt -->
+  <circle cx="800" cy="180" r="4"/> <!-- London -->
+</g>
+
+<!-- TRAIL PATH - The animated journey line -->
+<g id="trail-path" display="none">
+  <path display="inline" fill="none" stroke="#010101" stroke-width="5" stroke-miterlimit="10"
+    d="M180,780
+       C220,800 280,820 340,840
+       C400,860 440,870 480,860
+       C520,850 560,820 620,780
+       C680,740 760,700 840,680
+       C920,660 980,640 1020,600
+       C1060,560 1080,520 1060,480
+       C1040,440 1000,400 960,360
+       C920,320 900,280 920,240"/>
+</g>
+
+<!-- CAMERA PATH - Controls viewport movement -->
+<g id="camera-path" display="none">
+  <path display="inline" fill="none" stroke="#EC2227" stroke-width="3" stroke-miterlimit="10"
+    d="M180,780
+       C300,850 450,900 550,850
+       C650,800 750,720 850,680
+       C950,640 1050,550 1050,480
+       C1050,410 980,340 920,280
+       C860,220 880,180 920,240"/>
+</g>
+
+<!-- WAYPOINTS - Points of interest -->
+<g id="points" display="none">
+  <circle id="Lisbon" display="inline" fill="#405b54" cx="180" cy="780" r="5.782"/>
+  <circle id="Sevilla" display="inline" fill="#405b54" cx="340" cy="840" r="5.781"/>
+  <circle id="Granada" display="inline" fill="#405b54" cx="480" cy="860" r="5.781"/>
+  <circle id="Barcelona" display="inline" fill="#405b54" cx="840" cy="680" r="5.782"/>
+  <circle id="Montpellier" display="inline" fill="#405b54" cx="1020" cy="600" r="5.782"/>
+  <circle id="Lyon" display="inline" fill="#405b54" cx="1060" cy="480" r="5.782"/>
+  <circle id="Paris" display="inline" fill="#405b54" cx="920" cy="240" r="5.782"/>
+</g>
+
+<!-- Visible city labels (for static view reference) -->
+<g id="labels" font-family="Georgia, serif" font-size="14" fill="#6a787c" display="none">
+  <text x="180" y="810" text-anchor="middle">Lisboa</text>
+  <text x="340" y="870" text-anchor="middle">Sevilla</text>
+  <text x="480" y="890" text-anchor="middle">Granada</text>
+  <text x="840" y="710" text-anchor="middle">Barcelona</text>
+  <text x="1020" y="630" text-anchor="middle">Montpellier</text>
+  <text x="1060" y="510" text-anchor="middle">Lyon</text>
+  <text x="920" y="220" text-anchor="middle">Paris</text>
+</g>
+
+<!-- Compass Rose -->
+<g id="compass" transform="translate(100, 1300)">
+  <circle cx="0" cy="0" r="25" fill="none" stroke="#8a9a9e" stroke-width="0.5"/>
+  <polygon points="0,-20 4,0 0,-12 -4,0" fill="#c75050"/>
+  <polygon points="0,20 4,0 0,12 -4,0" fill="#8a9a9e"/>
+  <text x="0" y="-28" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#6a787c">N</text>
+</g>
+
+<!-- Scale -->
+<g id="scale" transform="translate(1800, 1350)">
+  <line x1="0" y1="0" x2="100" y2="0" stroke="#8a9a9e" stroke-width="1"/>
+  <line x1="0" y1="-4" x2="0" y2="4" stroke="#8a9a9e" stroke-width="1"/>
+  <line x1="100" y1="-4" x2="100" y2="4" stroke="#8a9a9e" stroke-width="1"/>
+  <text x="50" y="15" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#6a787c">200 km</text>
+</g>
+
+<!-- Atlantic Ocean Label -->
+<text x="80" y="500" font-family="Georgia, serif" font-size="24" fill="#9aa8ad" font-style="italic"
+      transform="rotate(-70, 80, 500)" opacity="0.5">Atlantic Ocean</text>
+
+<!-- Mediterranean Label -->
+<text x="700" y="1100" font-family="Georgia, serif" font-size="20" fill="#9aa8ad" font-style="italic" opacity="0.5">Mediterranean Sea</text>
+
+</svg>
