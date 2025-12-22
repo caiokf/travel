@@ -3,23 +3,23 @@
   "spec": "001-homepage-journey-list",
   "state": "building",
   "subtasks": {
-    "completed": 8,
+    "completed": 9,
     "total": 15,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Homepage Components",
+    "current": "View Components",
     "id": null,
-    "total": 3
+    "total": 2
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 9,
+    "number": 10,
     "started_at": "2025-12-22T20:29:24.538925"
   },
-  "last_update": "2025-12-22T20:40:05.597267"
+  "last_update": "2025-12-22T20:41:28.059392"
 }
