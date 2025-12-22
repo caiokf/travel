@@ -31,3 +31,13 @@ export interface MapState {
   cameraY: number
   zoom: number
 }
+
+export interface Trip {
+  id: string
+  title: string
+  subtitle: string
+  description: string
+  thumbnail: string
+  heroImage: string
+  route: string
+}
