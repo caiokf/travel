@@ -2,6 +2,7 @@ import { ref, onMounted, onUnmounted, watch, type Ref } from 'vue'
 import * as d3 from 'd3'
 import type { FeatureCollection, Feature, Geometry } from 'geojson'
 import type { Waypoint } from '../types'
+import { fetchJourneyRoutes, simplifyRoute } from '../services/routingService'
 
 interface D3MapOptions {
   geoJsonUrl: string
@@ -45,6 +46,10 @@ export function useD3Map(options: D3MapOptions) {
   let projectedPath: [number, number][] = []
   let projectedWaypoints: { id: string; x: number; y: number }[] = []
 
+  // Pre-calculated cumulative distances for smooth interpolation
+  let cumulativeDistances: number[] = []
+  let totalPathLength: number = 0
+
   // Load GeoJSON data
   const loadMap = async (): Promise<void> => {
     try {
@@ -74,8 +79,40 @@ export function useD3Map(options: D3MapOptions) {
         return { id: wp.id, x: 0, y: 0 }
       })
 
-      // Create smooth path through cities using curve
-      projectedPath = projectedWaypoints.map(wp => [wp.x, wp.y] as [number, number])
+      // Fetch actual driving routes between cities
+      try {
+        const waypointsWithCoords = waypoints.map(wp => ({
+          id: wp.id,
+          coordinates: cityCoordinates[wp.id] as [number, number]
+        }))
+
+        console.log('Fetching driving routes...')
+        const routeCoordinates = await fetchJourneyRoutes(waypointsWithCoords)
+
+        // Aggressively simplify the route for performance (tolerance 0.05 = ~100-200 points)
+        const simplifiedRoute = simplifyRoute(routeCoordinates, 0.05)
+        console.log(`Route simplified: ${routeCoordinates.length} → ${simplifiedRoute.length} points`)
+
+        // Project all route coordinates to canvas coordinates
+        projectedPath = simplifiedRoute.map(coord => {
+          const projected = projection!(coord)
+          return projected ? [projected[0], projected[1]] as [number, number] : [0, 0] as [number, number]
+        })
+      } catch (error) {
+        console.error('Failed to fetch driving routes, using straight lines:', error)
+        // Fallback to straight lines between waypoints
+        projectedPath = projectedWaypoints.map(wp => [wp.x, wp.y] as [number, number])
+      }
+
+      // Pre-calculate cumulative distances for smooth interpolation
+      cumulativeDistances = [0]
+      for (let i = 1; i < projectedPath.length; i++) {
+        const dx = projectedPath[i][0] - projectedPath[i - 1][0]
+        const dy = projectedPath[i][1] - projectedPath[i - 1][1]
+        const segmentLength = Math.sqrt(dx * dx + dy * dy)
+        cumulativeDistances.push(cumulativeDistances[i - 1] + segmentLength)
+      }
+      totalPathLength = cumulativeDistances[cumulativeDistances.length - 1] || 1
 
       isLoaded.value = true
     } catch (error) {
@@ -83,14 +120,30 @@ export function useD3Map(options: D3MapOptions) {
     }
   }
 
-  // Get point along the journey path at given progress (0-1)
+  // Get point along the journey path at given progress (0-1) using distance-based interpolation
   const getPointOnPath = (progress: number): { x: number; y: number } => {
     if (projectedPath.length < 2) return { x: 0, y: 0 }
 
-    const totalSegments = projectedPath.length - 1
-    const segmentProgress = progress * totalSegments
-    const segmentIndex = Math.min(Math.floor(segmentProgress), totalSegments - 1)
-    const segmentT = segmentProgress - segmentIndex
+    const targetDistance = progress * totalPathLength
+
+    // Binary search to find the segment containing the target distance
+    let low = 0
+    let high = cumulativeDistances.length - 1
+    while (low < high - 1) {
+      const mid = Math.floor((low + high) / 2)
+      if (cumulativeDistances[mid] <= targetDistance) {
+        low = mid
+      } else {
+        high = mid
+      }
+    }
+
+    const segmentIndex = low
+    const segmentStart = cumulativeDistances[segmentIndex]
+    const segmentEnd = cumulativeDistances[segmentIndex + 1] || segmentStart
+    const segmentLength = segmentEnd - segmentStart
+
+    const segmentT = segmentLength > 0 ? (targetDistance - segmentStart) / segmentLength : 0
 
     const p1 = projectedPath[segmentIndex]
     const p2 = projectedPath[Math.min(segmentIndex + 1, projectedPath.length - 1)]
@@ -101,6 +154,82 @@ export function useD3Map(options: D3MapOptions) {
     }
   }
 
+  // Get the segment index for a given progress (for efficient trail drawing)
+  const getSegmentIndexAtProgress = (progress: number): { index: number; t: number } => {
+    const targetDistance = progress * totalPathLength
+
+    let low = 0
+    let high = cumulativeDistances.length - 1
+    while (low < high - 1) {
+      const mid = Math.floor((low + high) / 2)
+      if (cumulativeDistances[mid] <= targetDistance) {
+        low = mid
+      } else {
+        high = mid
+      }
+    }
+
+    const segmentStart = cumulativeDistances[low]
+    const segmentEnd = cumulativeDistances[low + 1] || segmentStart
+    const segmentLength = segmentEnd - segmentStart
+    const t = segmentLength > 0 ? (targetDistance - segmentStart) / segmentLength : 0
+
+    return { index: low, t }
+  }
+
+  // Catmull-Rom spline interpolation for ultra-smooth camera movement
+  const catmullRom = (
+    p0: { x: number; y: number },
+    p1: { x: number; y: number },
+    p2: { x: number; y: number },
+    p3: { x: number; y: number },
+    t: number
+  ): { x: number; y: number } => {
+    const t2 = t * t
+    const t3 = t2 * t
+
+    // Catmull-Rom basis functions
+    const x =
+      0.5 * (
+        (2 * p1.x) +
+        (-p0.x + p2.x) * t +
+        (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+        (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3
+      )
+
+    const y =
+      0.5 * (
+        (2 * p1.y) +
+        (-p0.y + p2.y) * t +
+        (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+        (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3
+      )
+
+    return { x, y }
+  }
+
+  // Get smooth camera position using Catmull-Rom spline through waypoints
+  const getCameraPosition = (progress: number): { x: number; y: number } => {
+    if (projectedWaypoints.length < 2) return { x: 0, y: 0 }
+
+    const points = projectedWaypoints
+    const totalSegments = points.length - 1
+    const segmentProgress = progress * totalSegments
+    const segmentIndex = Math.min(Math.floor(segmentProgress), totalSegments - 1)
+    const t = segmentProgress - segmentIndex
+
+    // Apply smoothstep easing to t for even smoother transitions
+    const easedT = t * t * (3 - 2 * t)
+
+    // Get the 4 control points for Catmull-Rom (with clamping at edges)
+    const p0 = points[Math.max(0, segmentIndex - 1)]
+    const p1 = points[segmentIndex]
+    const p2 = points[Math.min(points.length - 1, segmentIndex + 1)]
+    const p3 = points[Math.min(points.length - 1, segmentIndex + 2)]
+
+    return catmullRom(p0, p1, p2, p3, easedT)
+  }
+
   const render = () => {
     const canvas = canvasRef.value
     if (!canvas || !isLoaded.value || !geoData || !projection || !pathGenerator) return
@@ -109,19 +238,23 @@ export function useD3Map(options: D3MapOptions) {
     if (!ctx) return
 
     const progress = scrollProgress.value
-    const currentPos = getPointOnPath(progress)
-    cameraPosition.value = currentPos
+
+    // Use smooth camera position (waypoint-based) for map panning
+    const camPos = getCameraPosition(progress)
+    cameraPosition.value = camPos
 
     const viewportWidth = canvas.width
     const viewportHeight = canvas.height
 
-    // Dynamic zoom and pan based on progress
+    // Dynamic zoom and pan based on progress (with eased zoom)
     const baseZoom = 1.2
-    const zoom = baseZoom + Math.sin(progress * Math.PI) * 0.4
+    const zoomProgress = Math.sin(progress * Math.PI)
+    const zoom = baseZoom + zoomProgress * 0.4
 
-    // Calculate viewport offset to follow the journey
-    const offsetX = currentPos.x * zoom - viewportWidth / 2
-    const offsetY = currentPos.y * zoom - viewportHeight / 2
+    // Calculate viewport offset - shift map to the right (show more on right side of screen)
+    const mapOffsetX = viewportWidth * 0.35 // Push map 35% to the right
+    const offsetX = camPos.x * zoom - viewportWidth / 2 - mapOffsetX
+    const offsetY = camPos.y * zoom - viewportHeight / 2
 
     // Clear canvas
     ctx.clearRect(0, 0, viewportWidth, viewportHeight)
@@ -175,33 +308,20 @@ export function useD3Map(options: D3MapOptions) {
   }
 
   const drawTrail = (ctx: CanvasRenderingContext2D, progress: number, zoom: number) => {
-    if (projectedPath.length < 2) return
+    if (projectedPath.length < 2 || progress <= 0) return
 
-    // Calculate how much of the path to draw
-    const totalSegments = projectedPath.length - 1
-    const progressSegments = progress * totalSegments
-    const fullSegments = Math.floor(progressSegments)
-    const partialProgress = progressSegments - fullSegments
+    // Get the segment index and interpolation for current progress
+    const { index: endIndex, t: endT } = getSegmentIndexAtProgress(progress)
 
-    // Build the visible path points
-    const visiblePoints: [number, number][] = []
-    for (let i = 0; i <= fullSegments && i < projectedPath.length; i++) {
-      visiblePoints.push(projectedPath[i])
-    }
+    // Calculate endpoint
+    const p1 = projectedPath[endIndex]
+    const p2 = projectedPath[Math.min(endIndex + 1, projectedPath.length - 1)]
+    const endPoint: [number, number] = [
+      p1[0] + (p2[0] - p1[0]) * endT,
+      p1[1] + (p2[1] - p1[1]) * endT
+    ]
 
-    // Add partial segment endpoint
-    if (fullSegments < totalSegments && partialProgress > 0) {
-      const p1 = projectedPath[fullSegments]
-      const p2 = projectedPath[fullSegments + 1]
-      visiblePoints.push([
-        p1[0] + (p2[0] - p1[0]) * partialProgress,
-        p1[1] + (p2[1] - p1[1]) * partialProgress
-      ])
-    }
-
-    if (visiblePoints.length < 2) return
-
-    // Draw trail shadow
+    // Draw trail shadow (simplified - just the main line offset)
     ctx.save()
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'
     ctx.lineWidth = 6 / zoom
@@ -209,10 +329,11 @@ export function useD3Map(options: D3MapOptions) {
     ctx.lineJoin = 'round'
 
     ctx.beginPath()
-    ctx.moveTo(visiblePoints[0][0] + 2, visiblePoints[0][1] + 2)
-    for (let i = 1; i < visiblePoints.length; i++) {
-      ctx.lineTo(visiblePoints[i][0] + 2, visiblePoints[i][1] + 2)
+    ctx.moveTo(projectedPath[0][0] + 2, projectedPath[0][1] + 2)
+    for (let i = 1; i <= endIndex; i++) {
+      ctx.lineTo(projectedPath[i][0] + 2, projectedPath[i][1] + 2)
     }
+    ctx.lineTo(endPoint[0] + 2, endPoint[1] + 2)
     ctx.stroke()
     ctx.restore()
 
@@ -225,10 +346,11 @@ export function useD3Map(options: D3MapOptions) {
     ctx.setLineDash([12 / zoom, 6 / zoom])
 
     ctx.beginPath()
-    ctx.moveTo(visiblePoints[0][0], visiblePoints[0][1])
-    for (let i = 1; i < visiblePoints.length; i++) {
-      ctx.lineTo(visiblePoints[i][0], visiblePoints[i][1])
+    ctx.moveTo(projectedPath[0][0], projectedPath[0][1])
+    for (let i = 1; i <= endIndex; i++) {
+      ctx.lineTo(projectedPath[i][0], projectedPath[i][1])
     }
+    ctx.lineTo(endPoint[0], endPoint[1])
     ctx.stroke()
     ctx.restore()
   }

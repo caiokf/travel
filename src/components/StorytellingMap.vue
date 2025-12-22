@@ -107,12 +107,19 @@ onUnmounted(() => {
   display: block;
 }
 
-/* Story Text Container */
+/* Story Text Container - positioned on the left */
 .text {
   position: relative;
   padding: 5em 3em;
   z-index: 1000;
-  background: transparent;
+  /* Subtle gradient fade to let map show through on the right */
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 60%,
+    rgba(255, 255, 255, 0.5) 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 /* Related/Footer */
@@ -138,6 +145,7 @@ onUnmounted(() => {
     padding: 2em;
     font-size: 0.85em;
     text-align: justify;
+    background: rgba(255, 255, 255, 0.92);
   }
 }
 </style>

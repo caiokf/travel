@@ -28,7 +28,7 @@ defineProps<{
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0 0 3em;
+  margin: 0;
   font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
 }
 

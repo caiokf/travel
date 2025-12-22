@@ -2,16 +2,31 @@
   "permissions": {
     "allow": [
       "Bash(pnpm install:*)",
+      "Bash(pnpm run build)",
+      "Bash(pnpm run test:*)",
       "Bash(pnpm vue-tsc:*)",
+      "Bash(git log:*)",
+      "Read(~/.zshrc)",
       "Bash(curl:*)",
-      "Bash(pnpm build:*)",
-      "WebFetch(domain:github.com)",
       "WebSearch",
+      "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(unzip:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(pnpm build:*)"
     ],
-    "deny": [],
-    "ask": []
+    "deny": [
+      "Bash(curl:*)",
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "WebFetch"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Write(./production/**)"
+    ]
   }
 }

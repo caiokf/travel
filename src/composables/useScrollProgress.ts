@@ -35,7 +35,16 @@ export function useScrollProgress(waypoints: Waypoint[]) {
   const updateScrollProgress = () => {
     const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
     const currentScroll = window.scrollY
-    const progress = scrollHeight > 0 ? currentScroll / scrollHeight : 0
+
+    // Offset to skip hero and intro sections (approximately 2 viewport heights)
+    const startOffset = window.innerHeight * 2
+    // Offset to finish map movement before footer (approximately 1 viewport height)
+    const endOffset = window.innerHeight * 1
+
+    const adjustedScroll = Math.max(0, currentScroll - startOffset)
+    const adjustedScrollHeight = Math.max(1, scrollHeight - startOffset - endOffset)
+
+    const progress = adjustedScrollHeight > 0 ? adjustedScroll / adjustedScrollHeight : 0
 
     scrollProgress.value = Math.max(0, Math.min(1, progress))
 
