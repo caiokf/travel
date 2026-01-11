@@ -194,11 +194,8 @@
     z-index: 1;
     text-align: center;
     color: #fff;
-    padding: 2.5em 3em;
+    padding: 2em;
     max-width: 700px;
-    background: rgba(24, 25, 34, 0.75);
-    border-radius: 8px;
-    backdrop-filter: blur(8px);
   }
 
   .globe-hero__title {
@@ -214,7 +211,13 @@
     font-family:
       Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
       'Times New Roman', serif;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    color: #181922;
+    text-shadow:
+      -1px -1px 0 #fff,
+      1px -1px 0 #fff,
+      -1px 1px 0 #fff,
+      1px 1px 0 #fff,
+      0 0 20px rgba(255, 255, 255, 0.5);
   }
 
   .globe-hero__title-part {
@@ -228,24 +231,33 @@
     text-indent: 4px;
     font-size: 0.85em;
     padding: 0.75em 0 0;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    color: #181922;
+    text-shadow:
+      -1px -1px 0 #fff,
+      1px -1px 0 #fff,
+      -1px 1px 0 #fff,
+      1px 1px 0 #fff;
   }
 
   .globe-hero__title-part::before,
   .globe-hero__title-part::after {
     content: '\2014';
     padding: 0 0.5em;
-    opacity: 0.6;
+    opacity: 0.5;
   }
 
   .globe-hero__description {
     font-size: 1.1em;
     line-height: 1.6;
-    color: #e8e8e8;
+    color: #181922;
     margin: 0 0 2.5em;
     font-family:
       'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-shadow:
+      -1px -1px 0 #fff,
+      1px -1px 0 #fff,
+      -1px 1px 0 #fff,
+      1px 1px 0 #fff;
   }
 
   .globe-hero__stats {
@@ -269,17 +281,27 @@
     font-family:
       Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
       'Times New Roman', serif;
-    color: #47dbb4;
+    color: #c75050;
     line-height: 1;
+    text-shadow:
+      -1px -1px 0 #fff,
+      1px -1px 0 #fff,
+      -1px 1px 0 #fff,
+      1px 1px 0 #fff;
   }
 
   .globe-hero__stat-label {
     font-size: 0.75em;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: #9d9c95;
+    color: #181922;
     font-family:
       'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    text-shadow:
+      -1px -1px 0 #fff,
+      1px -1px 0 #fff,
+      -1px 1px 0 #fff,
+      1px 1px 0 #fff;
   }
 
   .globe-hero__stat-divider {
@@ -288,7 +310,7 @@
     background: linear-gradient(
       to bottom,
       transparent,
-      rgba(255, 255, 255, 0.2),
+      rgba(24, 25, 34, 0.3),
       transparent
     );
   }
@@ -298,13 +320,18 @@
     flex-direction: column;
     align-items: center;
     gap: 0.5em;
-    color: #9d9c95;
+    color: #181922;
     font-size: 0.8em;
     text-transform: uppercase;
     letter-spacing: 2px;
     font-family:
       'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     animation: pulse 2s ease-in-out infinite;
+    text-shadow:
+      -1px -1px 0 #fff,
+      1px -1px 0 #fff,
+      -1px 1px 0 #fff,
+      1px 1px 0 #fff;
   }
 
   .globe-hero__scroll-icon {
