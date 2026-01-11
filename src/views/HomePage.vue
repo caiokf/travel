@@ -1,21 +1,25 @@
 <script setup lang="ts">
-  import HomeHero from '../components/HomeHero.vue'
-  import TripGrid from '../components/TripGrid.vue'
+  import { ref } from 'vue'
+  import GlobeHero from '../components/home/GlobeHero.vue'
+  import JourneyTimeline from '../components/home/JourneyTimeline.vue'
   import { trips } from '../data/trips'
+
+  // Track which trip is being hovered for globe interaction
+  const hoveredTripId = ref<string | null>(null)
+
+  function handleJourneyHover(tripId: string | null) {
+    hoveredTripId.value = tripId
+  }
 </script>
 
 <template>
   <div class="home-page">
-    <!-- Hero Header -->
-    <HomeHero
-      title="Travel Journeys"
-      subtitle="Stories from the Road"
-      description="Explore interactive storytelling journeys through beautiful destinations. Scroll through maps, discover stories, and experience travel adventures."
-    />
+    <!-- Hero with Globe -->
+    <GlobeHero :trips="trips" :focused-trip-id="hoveredTripId" />
 
-    <!-- Trip Grid -->
+    <!-- Timeline Section -->
     <main class="home-page__content">
-      <TripGrid :trips="trips" />
+      <JourneyTimeline :trips="trips" @journey-hover="handleJourneyHover" />
     </main>
 
     <!-- Footer -->
