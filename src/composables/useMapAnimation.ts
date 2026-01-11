@@ -28,7 +28,7 @@ export function useMapAnimation(options: MapAnimationOptions) {
     trailPath: null,
     cameraPath: null,
     trailLength: 0,
-    cameraLength: 0
+    cameraLength: 0,
   }
   let animationFrame: number | null = null
   let bufferCanvas: HTMLCanvasElement | null = null
@@ -48,10 +48,14 @@ export function useMapAnimation(options: MapAnimationOptions) {
       const cameraGroup = svgDoc.querySelector('#camera-path')
 
       // Get the path element from inside the group, or use the element directly if it's a path
-      pathData.trailPath = trailGroup?.querySelector('path') as SVGPathElement ||
-                           (trailGroup?.tagName === 'path' ? trailGroup as SVGPathElement : null)
-      pathData.cameraPath = cameraGroup?.querySelector('path') as SVGPathElement ||
-                            (cameraGroup?.tagName === 'path' ? cameraGroup as SVGPathElement : null)
+      pathData.trailPath =
+        (trailGroup?.querySelector('path') as SVGPathElement) ||
+        (trailGroup?.tagName === 'path' ? (trailGroup as SVGPathElement) : null)
+      pathData.cameraPath =
+        (cameraGroup?.querySelector('path') as SVGPathElement) ||
+        (cameraGroup?.tagName === 'path'
+          ? (cameraGroup as SVGPathElement)
+          : null)
 
       if (pathData.trailPath) {
         pathData.trailLength = pathData.trailPath.getTotalLength()
@@ -98,7 +102,10 @@ export function useMapAnimation(options: MapAnimationOptions) {
     }
   }
 
-  const getPointOnPath = (path: SVGPathElement | null, progress: number): { x: number; y: number } => {
+  const getPointOnPath = (
+    path: SVGPathElement | null,
+    progress: number
+  ): { x: number; y: number } => {
     if (!path) return { x: 0, y: 0 }
 
     const length = path.getTotalLength()
@@ -136,8 +143,14 @@ export function useMapAnimation(options: MapAnimationOptions) {
     const offsetY = camPos.y * zoom - viewportHeight / 2
 
     // Clamp offsets to keep map in bounds
-    const clampedOffsetX = Math.max(0, Math.min(scaledWidth - viewportWidth, offsetX))
-    const clampedOffsetY = Math.max(0, Math.min(scaledHeight - viewportHeight, offsetY))
+    const clampedOffsetX = Math.max(
+      0,
+      Math.min(scaledWidth - viewportWidth, offsetX)
+    )
+    const clampedOffsetY = Math.max(
+      0,
+      Math.min(scaledHeight - viewportHeight, offsetY)
+    )
 
     // Clear canvas
     ctx.clearRect(0, 0, viewportWidth, viewportHeight)
@@ -151,7 +164,17 @@ export function useMapAnimation(options: MapAnimationOptions) {
 
     // Draw the base map from buffer
     if (bufferCanvas) {
-      ctx.drawImage(bufferCanvas, 0, 0, bufferCanvas.width, bufferCanvas.height, 0, 0, mapWidth, mapHeight)
+      ctx.drawImage(
+        bufferCanvas,
+        0,
+        0,
+        bufferCanvas.width,
+        bufferCanvas.height,
+        0,
+        0,
+        mapWidth,
+        mapHeight
+      )
     }
 
     // Draw animated trail path
@@ -166,7 +189,10 @@ export function useMapAnimation(options: MapAnimationOptions) {
     ctx.restore()
   }
 
-  const drawAnimatedTrail = (ctx: CanvasRenderingContext2D, progress: number) => {
+  const drawAnimatedTrail = (
+    ctx: CanvasRenderingContext2D,
+    progress: number
+  ) => {
     if (!pathData.trailPath) return
 
     const length = pathData.trailLength * progress
@@ -235,7 +261,10 @@ export function useMapAnimation(options: MapAnimationOptions) {
     })
   }
 
-  const drawCurrentPosition = (ctx: CanvasRenderingContext2D, progress: number) => {
+  const drawCurrentPosition = (
+    ctx: CanvasRenderingContext2D,
+    progress: number
+  ) => {
     if (progress <= 0) return
 
     const pos = getPointOnPath(pathData.trailPath, progress)
@@ -298,6 +327,6 @@ export function useMapAnimation(options: MapAnimationOptions) {
     isLoaded,
     cameraPosition,
     currentPathLength,
-    render
+    render,
   }
 }

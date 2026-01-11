@@ -5,17 +5,17 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: () => import('../views/HomePage.vue')
+    component: () => import('../views/HomePage.vue'),
   },
   {
     path: '/trips/:id',
     name: 'trip',
-    component: () => import('../views/TripView.vue')
+    component: () => import('../views/TripView.vue'),
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/'
-  }
+    redirect: '/',
+  },
 ]
 
 const router = createRouter({
@@ -26,7 +26,7 @@ const router = createRouter({
       return savedPosition
     }
     return { top: 0 }
-  }
+  },
 })
 
 export default router

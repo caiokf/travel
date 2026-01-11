@@ -12,8 +12,9 @@ html {
 }
 
 body {
-  font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color: #5D5C56;
+  font-family:
+    'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #5d5c56;
   background: #fff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -27,7 +28,7 @@ body {
 
 a {
   outline: none;
-  color: #47DBB4;
+  color: #47dbb4;
   text-decoration: none;
   transition: color 0.3s ease;
 }
@@ -39,7 +40,7 @@ a:focus {
 
 /* Selection */
 ::selection {
-  background: #47DBB4;
+  background: #47dbb4;
   color: #fff;
 }
 
@@ -53,12 +54,12 @@ a:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #5D5C56;
+  background: #5d5c56;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #47DBB4;
+  background: #47dbb4;
 }
 
 /* Utility Classes */

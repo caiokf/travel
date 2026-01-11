@@ -18,8 +18,8 @@ const cityCoordinates: Record<string, [number, number]> = {
   granada: [-3.5986, 37.1773],
   barcelona: [2.1734, 41.3851],
   montpellier: [3.8767, 43.6108],
-  lyon: [4.8357, 45.7640],
-  paris: [2.3522, 48.8566]
+  lyon: [4.8357, 45.764],
+  paris: [2.3522, 48.8566],
 }
 
 // Countries to highlight (our journey passes through)
@@ -27,8 +27,16 @@ const journeyCountries = ['Portugal', 'Spain', 'France']
 
 // Countries to show for context
 const contextCountries = [
-  'United Kingdom', 'Ireland', 'Belgium', 'Netherlands', 'Luxembourg',
-  'Germany', 'Switzerland', 'Italy', 'Andorra', 'Monaco'
+  'United Kingdom',
+  'Ireland',
+  'Belgium',
+  'Netherlands',
+  'Luxembourg',
+  'Germany',
+  'Switzerland',
+  'Italy',
+  'Andorra',
+  'Monaco',
 ]
 
 export function useD3Map(options: D3MapOptions) {
@@ -58,7 +66,8 @@ export function useD3Map(options: D3MapOptions) {
 
       // Set up projection centered on Western Europe
       // Focus on the area from Portugal to France
-      projection = d3.geoMercator()
+      projection = d3
+        .geoMercator()
         .center([-2, 43]) // Center between Spain and France
         .scale(1800)
         .translate([1000, 700])
@@ -66,14 +75,14 @@ export function useD3Map(options: D3MapOptions) {
       pathGenerator = d3.geoPath().projection(projection)
 
       // Calculate projected coordinates for waypoints
-      projectedWaypoints = waypoints.map(wp => {
+      projectedWaypoints = waypoints.map((wp) => {
         const coords = cityCoordinates[wp.id]
         if (coords && projection) {
           const projected = projection(coords)
           return {
             id: wp.id,
             x: projected ? projected[0] : 0,
-            y: projected ? projected[1] : 0
+            y: projected ? projected[1] : 0,
           }
         }
         return { id: wp.id, x: 0, y: 0 }
@@ -81,9 +90,9 @@ export function useD3Map(options: D3MapOptions) {
 
       // Fetch actual driving routes between cities
       try {
-        const waypointsWithCoords = waypoints.map(wp => ({
+        const waypointsWithCoords = waypoints.map((wp) => ({
           id: wp.id,
-          coordinates: cityCoordinates[wp.id] as [number, number]
+          coordinates: cityCoordinates[wp.id] as [number, number],
         }))
 
         console.log('Fetching driving routes...')
@@ -91,17 +100,26 @@ export function useD3Map(options: D3MapOptions) {
 
         // Aggressively simplify the route for performance (tolerance 0.05 = ~100-200 points)
         const simplifiedRoute = simplifyRoute(routeCoordinates, 0.05)
-        console.log(`Route simplified: ${routeCoordinates.length} → ${simplifiedRoute.length} points`)
+        console.log(
+          `Route simplified: ${routeCoordinates.length} → ${simplifiedRoute.length} points`
+        )
 
         // Project all route coordinates to canvas coordinates
-        projectedPath = simplifiedRoute.map(coord => {
+        projectedPath = simplifiedRoute.map((coord) => {
           const projected = projection!(coord)
-          return projected ? [projected[0], projected[1]] as [number, number] : [0, 0] as [number, number]
+          return projected
+            ? ([projected[0], projected[1]] as [number, number])
+            : ([0, 0] as [number, number])
         })
       } catch (error) {
-        console.error('Failed to fetch driving routes, using straight lines:', error)
+        console.error(
+          'Failed to fetch driving routes, using straight lines:',
+          error
+        )
         // Fallback to straight lines between waypoints
-        projectedPath = projectedWaypoints.map(wp => [wp.x, wp.y] as [number, number])
+        projectedPath = projectedWaypoints.map(
+          (wp) => [wp.x, wp.y] as [number, number]
+        )
       }
 
       // Pre-calculate cumulative distances for smooth interpolation
@@ -143,19 +161,23 @@ export function useD3Map(options: D3MapOptions) {
     const segmentEnd = cumulativeDistances[segmentIndex + 1] || segmentStart
     const segmentLength = segmentEnd - segmentStart
 
-    const segmentT = segmentLength > 0 ? (targetDistance - segmentStart) / segmentLength : 0
+    const segmentT =
+      segmentLength > 0 ? (targetDistance - segmentStart) / segmentLength : 0
 
     const p1 = projectedPath[segmentIndex]
-    const p2 = projectedPath[Math.min(segmentIndex + 1, projectedPath.length - 1)]
+    const p2 =
+      projectedPath[Math.min(segmentIndex + 1, projectedPath.length - 1)]
 
     return {
       x: p1[0] + (p2[0] - p1[0]) * segmentT,
-      y: p1[1] + (p2[1] - p1[1]) * segmentT
+      y: p1[1] + (p2[1] - p1[1]) * segmentT,
     }
   }
 
   // Get the segment index for a given progress (for efficient trail drawing)
-  const getSegmentIndexAtProgress = (progress: number): { index: number; t: number } => {
+  const getSegmentIndexAtProgress = (
+    progress: number
+  ): { index: number; t: number } => {
     const targetDistance = progress * totalPathLength
 
     let low = 0
@@ -172,7 +194,8 @@ export function useD3Map(options: D3MapOptions) {
     const segmentStart = cumulativeDistances[low]
     const segmentEnd = cumulativeDistances[low + 1] || segmentStart
     const segmentLength = segmentEnd - segmentStart
-    const t = segmentLength > 0 ? (targetDistance - segmentStart) / segmentLength : 0
+    const t =
+      segmentLength > 0 ? (targetDistance - segmentStart) / segmentLength : 0
 
     return { index: low, t }
   }
@@ -190,20 +213,18 @@ export function useD3Map(options: D3MapOptions) {
 
     // Catmull-Rom basis functions
     const x =
-      0.5 * (
-        (2 * p1.x) +
+      0.5 *
+      (2 * p1.x +
         (-p0.x + p2.x) * t +
         (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
-        (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3
-      )
+        (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3)
 
     const y =
-      0.5 * (
-        (2 * p1.y) +
+      0.5 *
+      (2 * p1.y +
         (-p0.y + p2.y) * t +
         (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
-        (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3
-      )
+        (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
 
     return { x, y }
   }
@@ -215,7 +236,10 @@ export function useD3Map(options: D3MapOptions) {
     const points = projectedWaypoints
     const totalSegments = points.length - 1
     const segmentProgress = progress * totalSegments
-    const segmentIndex = Math.min(Math.floor(segmentProgress), totalSegments - 1)
+    const segmentIndex = Math.min(
+      Math.floor(segmentProgress),
+      totalSegments - 1
+    )
     const t = segmentProgress - segmentIndex
 
     // Apply smoothstep easing to t for even smoother transitions
@@ -232,7 +256,8 @@ export function useD3Map(options: D3MapOptions) {
 
   const render = () => {
     const canvas = canvasRef.value
-    if (!canvas || !isLoaded.value || !geoData || !projection || !pathGenerator) return
+    if (!canvas || !isLoaded.value || !geoData || !projection || !pathGenerator)
+      return
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -307,7 +332,11 @@ export function useD3Map(options: D3MapOptions) {
     ctx.restore()
   }
 
-  const drawTrail = (ctx: CanvasRenderingContext2D, progress: number, zoom: number) => {
+  const drawTrail = (
+    ctx: CanvasRenderingContext2D,
+    progress: number,
+    zoom: number
+  ) => {
     if (projectedPath.length < 2 || progress <= 0) return
 
     // Get the segment index and interpolation for current progress
@@ -318,7 +347,7 @@ export function useD3Map(options: D3MapOptions) {
     const p2 = projectedPath[Math.min(endIndex + 1, projectedPath.length - 1)]
     const endPoint: [number, number] = [
       p1[0] + (p2[0] - p1[0]) * endT,
-      p1[1] + (p2[1] - p1[1]) * endT
+      p1[1] + (p2[1] - p1[1]) * endT,
     ]
 
     // Draw trail shadow (simplified - just the main line offset)
@@ -355,7 +384,11 @@ export function useD3Map(options: D3MapOptions) {
     ctx.restore()
   }
 
-  const drawWaypoints = (ctx: CanvasRenderingContext2D, progress: number, zoom: number) => {
+  const drawWaypoints = (
+    ctx: CanvasRenderingContext2D,
+    progress: number,
+    zoom: number
+  ) => {
     projectedWaypoints.forEach((wp, index) => {
       const waypointProgress = index / (projectedWaypoints.length - 1)
       const isActive = progress >= waypointProgress
@@ -385,7 +418,11 @@ export function useD3Map(options: D3MapOptions) {
     })
   }
 
-  const drawCurrentPosition = (ctx: CanvasRenderingContext2D, progress: number, zoom: number) => {
+  const drawCurrentPosition = (
+    ctx: CanvasRenderingContext2D,
+    progress: number,
+    zoom: number
+  ) => {
     if (progress <= 0) return
 
     const pos = getPointOnPath(progress)
@@ -444,6 +481,6 @@ export function useD3Map(options: D3MapOptions) {
   return {
     isLoaded,
     cameraPosition,
-    render
+    render,
   }
 }

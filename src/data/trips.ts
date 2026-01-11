@@ -10,10 +10,10 @@ export const trips: Trip[] = [
     description: 'An interactive storytelling journey through Western Europe.',
     thumbnail: '/img/trips/european-trail-thumb.jpg',
     heroImage: '/img/hero.jpg',
-    route: '/trips/european-trail'
-  }
+    route: '/trips/european-trail',
+  },
 ]
 
 export const getTripById = (id: string): Trip | undefined => {
-  return trips.find(t => t.id === id)
+  return trips.find((t) => t.id === id)
 }

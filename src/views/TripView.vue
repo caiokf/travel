@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import StorytellingMap from '../components/StorytellingMap.vue'
+  import StorytellingMap from '../components/StorytellingMap.vue'
 </script>
 
 <template>
@@ -9,7 +9,7 @@ import StorytellingMap from '../components/StorytellingMap.vue'
 </template>
 
 <style scoped>
-.trip-view {
-  position: relative;
-}
+  .trip-view {
+    position: relative;
+  }
 </style>

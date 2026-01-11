@@ -20,7 +20,7 @@ const OSRM_API = 'https://router.project-osrm.org/route/v1/driving'
  */
 export async function fetchDrivingRoute(
   from: [number, number], // [lng, lat]
-  to: [number, number]    // [lng, lat]
+  to: [number, number] // [lng, lat]
 ): Promise<[number, number][]> {
   const url = `${OSRM_API}/${from[0]},${from[1]};${to[0]},${to[1]}?overview=full&geometries=geojson`
 
@@ -48,7 +48,7 @@ export async function fetchJourneyRoutes(
   waypoints: { id: string; coordinates: [number, number] }[]
 ): Promise<[number, number][]> {
   if (waypoints.length < 2) {
-    return waypoints.map(wp => wp.coordinates)
+    return waypoints.map((wp) => wp.coordinates)
   }
 
   const allCoordinates: [number, number][] = []
@@ -60,7 +60,10 @@ export async function fetchJourneyRoutes(
 
     console.log(`Fetching route: ${from.id} → ${to.id}`)
 
-    const segmentCoords = await fetchDrivingRoute(from.coordinates, to.coordinates)
+    const segmentCoords = await fetchDrivingRoute(
+      from.coordinates,
+      to.coordinates
+    )
 
     // Add coordinates (skip first point for subsequent segments to avoid duplicates)
     if (i === 0) {
@@ -119,7 +122,9 @@ function perpendicularDistance(
   const mag = Math.sqrt(dx * dx + dy * dy)
   if (mag === 0) return 0
 
-  const u = ((point[0] - lineStart[0]) * dx + (point[1] - lineStart[1]) * dy) / (mag * mag)
+  const u =
+    ((point[0] - lineStart[0]) * dx + (point[1] - lineStart[1]) * dy) /
+    (mag * mag)
 
   const closestX = lineStart[0] + u * dx
   const closestY = lineStart[1] + u * dy
