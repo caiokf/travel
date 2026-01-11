@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  defineProps<{
+  const props = defineProps<{
     title: string
     subtitle: string
     description: string
@@ -8,7 +8,10 @@
 </script>
 
 <template>
-  <header class="hero-header">
+  <header
+    class="hero-header"
+    :style="props.backgroundImage ? { backgroundImage: `url(${props.backgroundImage})` } : {}"
+  >
     <div class="hero-header__content">
       <h1 class="hero-header__title">
         <span class="hero-header__title-main">{{ title }}</span>
@@ -32,7 +35,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #181922 url('/img/hero.jpg') no-repeat center center;
+    background-color: #181922;
+    background-repeat: no-repeat;
+    background-position: center center;
     background-size: cover;
   }
 
