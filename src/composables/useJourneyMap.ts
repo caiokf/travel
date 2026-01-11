@@ -64,14 +64,14 @@ export function useJourneyMap(options: JourneyMapOptions) {
       // Calculate scale based on bounds (with padding)
       const lonSpan = maxLon - minLon
       const latSpan = maxLat - minLat
-      const span = Math.max(lonSpan, latSpan, 3) // Minimum 3 degrees
-      const scale = 2400 / span // Higher value = more zoomed in
+      const span = Math.max(lonSpan, latSpan, 2) // Minimum 2 degrees
+      const scale = 4000 / span // Higher value = more zoomed in
 
       // Set up projection centered on journey
       projection = d3
         .geoMercator()
         .center([centerLon, centerLat])
-        .scale(Math.min(scale, 6000)) // Allow more zoom for tight routes
+        .scale(Math.min(scale, 10000)) // Allow more zoom for tight routes
         .translate([800, 600])
 
       pathGenerator = d3.geoPath().projection(projection)
