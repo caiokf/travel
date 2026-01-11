@@ -196,7 +196,7 @@ function frontmatterToJourney(
     countries,
     distance: String(frontmatter.distance || ''),
     waypoints,
-    thumbnail: `/img/journeys/${slug}/thumb.png`,
+    thumbnail: `/img/journeys/${slug}/thumbnail.png`,
     heroImage: `/img/journeys/${slug}/hero.png`,
     status,
     tags,
