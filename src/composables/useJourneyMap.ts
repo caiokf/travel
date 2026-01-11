@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 import * as topojson from 'topojson-client'
 import type { FeatureCollection, Feature, Geometry } from 'geojson'
 import type { WaypointWithProgress } from './useJourneyScrollProgress'
+import { fetchJourneyRoutes, simplifyRoute } from '../services/routingService'
 
 // World Atlas TopoJSON URL (Natural Earth 110m)
 const WORLD_URL =
@@ -86,10 +87,36 @@ export function useJourneyMap(options: JourneyMapOptions) {
         }
       })
 
-      // Create path from waypoints (straight lines for now)
-      projectedPath = projectedWaypoints.map(
-        (wp) => [wp.x, wp.y] as [number, number]
-      )
+      // Fetch actual driving routes between waypoints
+      try {
+        const waypointsWithCoords = wps.map((wp) => ({
+          id: wp.id,
+          coordinates: [wp.lon, wp.lat] as [number, number],
+        }))
+
+        console.log('Fetching driving routes...')
+        const routeCoordinates = await fetchJourneyRoutes(waypointsWithCoords)
+
+        // Simplify the route for performance
+        const simplifiedRoute = simplifyRoute(routeCoordinates, 0.01)
+        console.log(
+          `Route simplified: ${routeCoordinates.length} → ${simplifiedRoute.length} points`
+        )
+
+        // Project all route coordinates to canvas coordinates
+        projectedPath = simplifiedRoute.map((coord) => {
+          const projected = projection!(coord)
+          return projected
+            ? ([projected[0], projected[1]] as [number, number])
+            : ([0, 0] as [number, number])
+        })
+      } catch (error) {
+        console.error('Failed to fetch driving routes, using straight lines:', error)
+        // Fallback to straight lines between waypoints
+        projectedPath = projectedWaypoints.map(
+          (wp) => [wp.x, wp.y] as [number, number]
+        )
+      }
 
       // Pre-calculate cumulative distances for smooth interpolation
       cumulativeDistances = [0]
