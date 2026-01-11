@@ -27,6 +27,11 @@ const slug = computed(() => route.params.slug as string)
 const waypoints = computed(() => journey.value?.waypoints || [])
 const countries = computed(() => journey.value?.countries || [])
 
+// Map configuration from frontmatter
+const mapZoom = computed(() => journey.value?.mapZoom)
+const mapCenter = computed(() => journey.value?.mapCenter)
+const routeType = computed(() => journey.value?.routeType)
+
 // Scroll progress tracking
 const { scrollProgress, waypointsWithProgress } =
   useJourneyScrollProgress(waypoints)
@@ -37,6 +42,9 @@ useJourneyMap({
   countries,
   scrollProgress,
   canvasRef,
+  mapZoom,
+  mapCenter,
+  routeType,
 })
 
 // Convert story sections to StorySection format expected by component

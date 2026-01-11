@@ -16,7 +16,22 @@ let journeyListCache: Journey[] | null = null
 // Journey index - maps slug to filename
 // In a real app, this could be generated at build time or fetched from an API
 const JOURNEY_INDEX: Record<string, string> = {
+  'croatia-paklenica-climbing': '2014-05-15-croatia-paklenica.md',
+  'bike-zagreb-to-cluj': '2014-05-25-bike-zagreb-to-cluj.md',
+  'uruguay-adventure': '2014-10-17-uruguay-adventure.md',
+  'switzerland-winter-2014': '2014-12-26-switzerland-winter.md',
+  'switzerland-to-cappadocia': '2015-03-31-switzerland-to-cappadocia.md',
+  'cappadocia-to-marmaris-2015': '2015-05-25-cappadocia-to-marmaris.md',
+  'first-cappadocia': '2015-05-25-first-cappadocia.md',
+  'st-petersburg-to-kirkenes': '2015-10-05-st-petersburg-to-kirkenes.md',
+  'ukraine-skiing-carpathians': '2016-02-01-ukraine-skiing.md',
   'winter-hitchhiking-scandinavia': '2016-03-13-winter-hitchhiking-scandinavia.md',
+  'lisbon-to-moscow': '2017-06-27-lisbon-to-moscow.md',
+  'kazakhstan-to-bishkek': '2017-07-20-kazakhstan-to-bishkek.md',
+  'kyrgyzstan-tajikistan-pamir-highway': '2017-08-18-kyrgyzstan-tajikistan.md',
+  'iran-discovery-2017': '2017-10-08-iran-discovery.md',
+  'dubai-stopover': '2019-02-17-dubai-stopover.md',
+  'sri-lanka-exploration': '2019-02-27-sri-lanka-exploration.md',
 }
 
 /**
@@ -153,6 +168,22 @@ function frontmatterToJourney(
       .map((s: string) => s.trim())
   }
 
+  // Parse map configuration
+  const mapZoom = frontmatter['map-zoom']
+    ? Number(frontmatter['map-zoom'])
+    : undefined
+
+  let mapCenter: [number, number] | undefined
+  if (Array.isArray(frontmatter['map-center']) && frontmatter['map-center'].length === 2) {
+    mapCenter = [Number(frontmatter['map-center'][0]), Number(frontmatter['map-center'][1])]
+  }
+
+  let routeType: 'driving' | 'walking' | 'cycling' | 'straight' | undefined
+  const rawRouteType = String(frontmatter['route-type'] || '')
+  if (['driving', 'walking', 'cycling', 'straight'].includes(rawRouteType)) {
+    routeType = rawRouteType as 'driving' | 'walking' | 'cycling' | 'straight'
+  }
+
   return {
     id: String(frontmatter.id || slug),
     slug,
@@ -169,6 +200,9 @@ function frontmatterToJourney(
     heroImage: String(frontmatter['hero-image'] || frontmatter.heroImage || ''),
     status,
     tags,
+    mapZoom,
+    mapCenter,
+    routeType,
     coordinates,
     year: startDate.getFullYear(),
     month: startDate.getMonth() + 1,

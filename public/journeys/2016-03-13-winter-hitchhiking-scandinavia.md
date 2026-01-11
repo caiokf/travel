@@ -22,6 +22,10 @@ status: in-progress
 # Tags
 tags: [hitchhiking, winter, arctic, sami, scandinavia]
 
+# Map Configuration
+map-zoom: 3000
+route-type: driving
+
 # Waypoints
 waypoints:
   - id: kirkenes

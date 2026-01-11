@@ -14,10 +14,14 @@ interface JourneyMapOptions {
   countries: Ref<string[]>
   scrollProgress: Ref<number>
   canvasRef: Ref<HTMLCanvasElement | null>
+  // Optional configuration from markdown frontmatter
+  mapZoom?: Ref<number | undefined>
+  mapCenter?: Ref<[number, number] | undefined>
+  routeType?: Ref<'driving' | 'walking' | 'cycling' | 'straight' | undefined>
 }
 
 export function useJourneyMap(options: JourneyMapOptions) {
-  const { waypoints, countries, scrollProgress, canvasRef } = options
+  const { waypoints, countries, scrollProgress, canvasRef, mapZoom, mapCenter, routeType } = options
 
   const isLoaded = ref(false)
   const cameraPosition = ref({ x: 0, y: 0 })
@@ -59,20 +63,22 @@ export function useJourneyMap(options: JourneyMapOptions) {
       const minLat = Math.min(...lats)
       const maxLat = Math.max(...lats)
 
-      const centerLon = (minLon + maxLon) / 2
-      const centerLat = (minLat + maxLat) / 2
+      // Use frontmatter center or calculate from waypoints
+      const centerLon = mapCenter?.value?.[0] ?? (minLon + maxLon) / 2
+      const centerLat = mapCenter?.value?.[1] ?? (minLat + maxLat) / 2
 
-      // Calculate scale based on bounds (with padding)
+      // Calculate scale based on bounds, or use frontmatter override
       const lonSpan = maxLon - minLon
       const latSpan = maxLat - minLat
       const span = Math.max(lonSpan, latSpan, 1) // Minimum 1 degree
-      const scale = 8000 / span // Higher value = more zoomed in
+      const autoScale = 8000 / span
+      const scale = mapZoom?.value ?? Math.min(autoScale, 20000)
 
       // Set up projection centered on journey
       projection = d3
         .geoMercator()
         .center([centerLon, centerLat])
-        .scale(Math.min(scale, 20000)) // Allow more zoom for tight routes
+        .scale(scale)
         .translate([800, 600])
 
       pathGenerator = d3.geoPath().projection(projection)
@@ -87,35 +93,45 @@ export function useJourneyMap(options: JourneyMapOptions) {
         }
       })
 
-      // Fetch actual driving routes between waypoints
-      try {
-        const waypointsWithCoords = wps.map((wp) => ({
-          id: wp.id,
-          coordinates: [wp.lon, wp.lat] as [number, number],
-        }))
+      // Fetch routes between waypoints based on routeType
+      const currentRouteType = routeType?.value ?? 'driving'
 
-        console.log('Fetching driving routes...')
-        const routeCoordinates = await fetchJourneyRoutes(waypointsWithCoords)
-
-        // Simplify the route for performance
-        const simplifiedRoute = simplifyRoute(routeCoordinates, 0.01)
-        console.log(
-          `Route simplified: ${routeCoordinates.length} → ${simplifiedRoute.length} points`
-        )
-
-        // Project all route coordinates to canvas coordinates
-        projectedPath = simplifiedRoute.map((coord) => {
-          const projected = projection!(coord)
-          return projected
-            ? ([projected[0], projected[1]] as [number, number])
-            : ([0, 0] as [number, number])
-        })
-      } catch (error) {
-        console.error('Failed to fetch driving routes, using straight lines:', error)
-        // Fallback to straight lines between waypoints
+      if (currentRouteType === 'straight') {
+        // Use straight lines between waypoints
         projectedPath = projectedWaypoints.map(
           (wp) => [wp.x, wp.y] as [number, number]
         )
+      } else {
+        // Fetch actual routes (driving, walking, cycling) via OSRM
+        try {
+          const waypointsWithCoords = wps.map((wp) => ({
+            id: wp.id,
+            coordinates: [wp.lon, wp.lat] as [number, number],
+          }))
+
+          console.log(`Fetching ${currentRouteType} routes...`)
+          const routeCoordinates = await fetchJourneyRoutes(waypointsWithCoords, currentRouteType)
+
+          // Simplify the route for performance
+          const simplifiedRoute = simplifyRoute(routeCoordinates, 0.01)
+          console.log(
+            `Route simplified: ${routeCoordinates.length} → ${simplifiedRoute.length} points`
+          )
+
+          // Project all route coordinates to canvas coordinates
+          projectedPath = simplifiedRoute.map((coord) => {
+            const projected = projection!(coord)
+            return projected
+              ? ([projected[0], projected[1]] as [number, number])
+              : ([0, 0] as [number, number])
+          })
+        } catch (error) {
+          console.error('Failed to fetch routes, using straight lines:', error)
+          // Fallback to straight lines between waypoints
+          projectedPath = projectedWaypoints.map(
+            (wp) => [wp.x, wp.y] as [number, number]
+          )
+        }
       }
 
       // Pre-calculate cumulative distances for smooth interpolation

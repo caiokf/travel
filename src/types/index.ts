@@ -78,6 +78,11 @@ export interface Journey {
   // Optional
   tags?: string[]
 
+  // Map configuration (optional overrides)
+  mapZoom?: number // Override auto-calculated zoom (higher = more zoomed in)
+  mapCenter?: [number, number] // Override auto-calculated center [lon, lat]
+  routeType?: 'driving' | 'walking' | 'cycling' | 'straight' // How to draw route between waypoints
+
   // Computed from waypoints for globe/timeline
   coordinates: [number, number][] // [lon, lat] array
   year: number

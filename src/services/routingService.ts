@@ -12,17 +12,26 @@ export interface RouteSegment {
   coordinates: [number, number][] // [lng, lat] format for consistency with GeoJSON
 }
 
-// OSRM API endpoint for driving routes
-const OSRM_API = 'https://router.project-osrm.org/route/v1/driving'
+// OSRM API endpoint base URL
+const OSRM_API_BASE = 'https://router.project-osrm.org/route/v1'
+
+// Route type to OSRM profile mapping
+const ROUTE_PROFILES: Record<string, string> = {
+  driving: 'driving',
+  walking: 'foot',
+  cycling: 'bike',
+}
 
 /**
- * Fetch driving route between two points using OSRM
+ * Fetch route between two points using OSRM
  */
-export async function fetchDrivingRoute(
+export async function fetchRoute(
   from: [number, number], // [lng, lat]
-  to: [number, number] // [lng, lat]
+  to: [number, number], // [lng, lat]
+  routeType: 'driving' | 'walking' | 'cycling' = 'driving'
 ): Promise<[number, number][]> {
-  const url = `${OSRM_API}/${from[0]},${from[1]};${to[0]},${to[1]}?overview=full&geometries=geojson`
+  const profile = ROUTE_PROFILES[routeType] || 'driving'
+  const url = `${OSRM_API_BASE}/${profile}/${from[0]},${from[1]};${to[0]},${to[1]}?overview=full&geometries=geojson`
 
   try {
     const response = await fetch(url)
@@ -42,10 +51,11 @@ export async function fetchDrivingRoute(
 }
 
 /**
- * Fetch all driving routes for a journey through multiple waypoints
+ * Fetch all routes for a journey through multiple waypoints
  */
 export async function fetchJourneyRoutes(
-  waypoints: { id: string; coordinates: [number, number] }[]
+  waypoints: { id: string; coordinates: [number, number] }[],
+  routeType: 'driving' | 'walking' | 'cycling' = 'driving'
 ): Promise<[number, number][]> {
   if (waypoints.length < 2) {
     return waypoints.map((wp) => wp.coordinates)
@@ -58,11 +68,12 @@ export async function fetchJourneyRoutes(
     const from = waypoints[i]
     const to = waypoints[i + 1]
 
-    console.log(`Fetching route: ${from.id} → ${to.id}`)
+    console.log(`Fetching ${routeType} route: ${from.id} → ${to.id}`)
 
-    const segmentCoords = await fetchDrivingRoute(
+    const segmentCoords = await fetchRoute(
       from.coordinates,
-      to.coordinates
+      to.coordinates,
+      routeType
     )
 
     // Add coordinates (skip first point for subsequent segments to avoid duplicates)
