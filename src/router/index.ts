@@ -8,9 +8,14 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/HomePage.vue'),
   },
   {
+    path: '/journeys/:slug',
+    name: 'journey',
+    component: () => import('../views/JourneyView.vue'),
+  },
+  // Legacy route - redirect to home for now
+  {
     path: '/trips/:id',
-    name: 'trip',
-    component: () => import('../views/TripView.vue'),
+    redirect: '/',
   },
   {
     path: '/:pathMatch(.*)*',
