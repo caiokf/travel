@@ -15,8 +15,6 @@ countries: [Norway, Sweden, Finland]
 distance: ~1200 km
 
 # Display
-thumbnail: /img/journeys/scandinavia-2016/thumb.jpg
-hero-image: /img/journeys/scandinavia-2016/hero.jpg
 status: in-progress
 
 # Tags
