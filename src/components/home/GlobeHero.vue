@@ -194,8 +194,11 @@
     z-index: 1;
     text-align: center;
     color: #fff;
-    padding: 2em;
+    padding: 2.5em 3em;
     max-width: 700px;
+    background: rgba(24, 25, 34, 0.75);
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
   }
 
   .globe-hero__title {
@@ -211,7 +214,7 @@
     font-family:
       Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
       'Times New Roman', serif;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   }
 
   .globe-hero__title-part {
@@ -225,7 +228,7 @@
     text-indent: 4px;
     font-size: 0.85em;
     padding: 0.75em 0 0;
-    opacity: 0.9;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
 
   .globe-hero__title-part::before,
@@ -238,10 +241,11 @@
   .globe-hero__description {
     font-size: 1.1em;
     line-height: 1.6;
-    color: #d1d2d2;
+    color: #e8e8e8;
     margin: 0 0 2.5em;
     font-family:
       'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
   .globe-hero__stats {

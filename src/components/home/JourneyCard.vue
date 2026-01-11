@@ -130,7 +130,7 @@
     position: relative;
     margin: 0;
     overflow: hidden;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 21 / 9;
   }
 
   .journey-card__image {
@@ -169,15 +169,15 @@
   }
 
   .journey-card__content {
-    padding: 1.5em;
+    padding: 1em 1.25em;
   }
 
   .journey-card__header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 1em;
-    margin-bottom: 0.75em;
+    gap: 0.75em;
+    margin-bottom: 0.5em;
   }
 
   .journey-card__titles {
@@ -187,12 +187,12 @@
 
   .journey-card__subtitle {
     display: block;
-    font-size: 0.75em;
+    font-size: 0.65em;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     color: #cecec5;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.25em;
     font-family:
       'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
@@ -201,7 +201,7 @@
     font-family:
       Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
       'Times New Roman', serif;
-    font-size: 1.5em;
+    font-size: 1.2em;
     font-weight: 400;
     color: #5f646c;
     margin: 0;
@@ -226,19 +226,19 @@
   }
 
   .journey-card__description {
-    font-size: 0.9em;
+    font-size: 0.8em;
     color: #9d9c95;
-    line-height: 1.5;
-    margin: 0 0 1em;
+    line-height: 1.4;
+    margin: 0 0 0.5em;
     font-family:
       'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 
   .journey-card__stats {
-    font-size: 0.8em;
+    font-size: 0.7em;
     font-weight: 500;
     color: #5f646c;
-    margin-bottom: 0.75em;
+    margin-bottom: 0.5em;
     font-family:
       'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     letter-spacing: 0.5px;
@@ -247,17 +247,17 @@
   .journey-card__countries {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5em;
-    margin-bottom: 0.75em;
+    gap: 0.35em;
+    margin-bottom: 0.5em;
   }
 
   .journey-card__country-tag {
     display: inline-block;
-    padding: 0.25em 0.75em;
-    font-size: 0.7em;
+    padding: 0.2em 0.5em;
+    font-size: 0.6em;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     color: #5f646c;
     background: #f8f9fa;
     border-radius: 2px;
@@ -266,7 +266,7 @@
   }
 
   .journey-card__date {
-    font-size: 0.75em;
+    font-size: 0.65em;
     color: #cecec5;
     font-family:
       'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -274,20 +274,20 @@
 
   @media (max-width: 720px) {
     .journey-card__content {
-      padding: 1.25em;
+      padding: 1em;
     }
 
     .journey-card__header {
       flex-direction: column;
-      gap: 0.75em;
+      gap: 0.5em;
     }
 
     .journey-card__title {
-      font-size: 1.25em;
+      font-size: 1.1em;
     }
 
     .journey-card__description {
-      font-size: 0.85em;
+      font-size: 0.75em;
     }
 
     .journey-card__route {
