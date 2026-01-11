@@ -1,13 +1,9 @@
 import { ref, onMounted, onUnmounted, watch, type Ref } from 'vue'
 import * as d3 from 'd3'
-import * as topojson from 'topojson-client'
 import type { FeatureCollection, Feature, Geometry } from 'geojson'
 import type { WaypointWithProgress } from './useJourneyScrollProgress'
 import { fetchJourneyRoutes, simplifyRoute } from '../services/routingService'
-
-// World Atlas TopoJSON URL (Natural Earth 110m)
-const WORLD_URL =
-  'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
+import { getWorldMap, getCachedRoute, cacheRoute } from '../services/mapCache'
 
 interface JourneyMapOptions {
   waypoints: Ref<WaypointWithProgress[]>
@@ -39,17 +35,27 @@ export function useJourneyMap(options: JourneyMapOptions) {
   let cumulativeDistances: number[] = []
   let totalPathLength: number = 0
 
-  // Load world map data
+  // Helper to recalculate path distances
+  const recalculateDistances = () => {
+    cumulativeDistances = [0]
+    for (let i = 1; i < projectedPath.length; i++) {
+      const dx = projectedPath[i][0] - projectedPath[i - 1][0]
+      const dy = projectedPath[i][1] - projectedPath[i - 1][1]
+      const segmentLength = Math.sqrt(dx * dx + dy * dy)
+      cumulativeDistances.push(cumulativeDistances[i - 1] + segmentLength)
+    }
+    totalPathLength = cumulativeDistances[cumulativeDistances.length - 1] || 1
+  }
+
+  // Load world map data (uses cache from preload)
   const loadMap = async (): Promise<void> => {
     try {
-      const response = await fetch(WORLD_URL)
-      const worldTopology = await response.json()
-
-      // Convert TopoJSON to GeoJSON
-      geoData = topojson.feature(
-        worldTopology,
-        worldTopology.objects.countries
-      ) as unknown as FeatureCollection
+      // Get world map from cache (preloaded on homepage)
+      geoData = await getWorldMap()
+      if (!geoData) {
+        console.error('Failed to load world map')
+        return
+      }
 
       // Calculate bounds from waypoints
       const wps = waypoints.value
@@ -93,58 +99,61 @@ export function useJourneyMap(options: JourneyMapOptions) {
         }
       })
 
-      // Fetch routes between waypoints based on routeType
+      // Start with straight lines for instant display
+      projectedPath = projectedWaypoints.map(
+        (wp) => [wp.x, wp.y] as [number, number]
+      )
+      recalculateDistances()
+      isLoaded.value = true
+
+      // Fetch actual routes in background (unless straight lines requested)
       const currentRouteType = routeType?.value ?? 'driving'
 
-      if (currentRouteType === 'straight') {
-        // Use straight lines between waypoints
-        projectedPath = projectedWaypoints.map(
-          (wp) => [wp.x, wp.y] as [number, number]
-        )
-      } else {
-        // Fetch actual routes (driving, walking, cycling) via OSRM
-        try {
-          const waypointsWithCoords = wps.map((wp) => ({
-            id: wp.id,
-            coordinates: [wp.lon, wp.lat] as [number, number],
-          }))
+      if (currentRouteType !== 'straight') {
+        const waypointsWithCoords = wps.map((wp) => ({
+          id: wp.id,
+          coordinates: [wp.lon, wp.lat] as [number, number],
+        }))
 
-          console.log(`Fetching ${currentRouteType} routes...`)
-          const routeCoordinates = await fetchJourneyRoutes(waypointsWithCoords, currentRouteType)
-
-          // Simplify the route for performance
-          const simplifiedRoute = simplifyRoute(routeCoordinates, 0.01)
-          console.log(
-            `Route simplified: ${routeCoordinates.length} → ${simplifiedRoute.length} points`
-          )
-
-          // Project all route coordinates to canvas coordinates
-          projectedPath = simplifiedRoute.map((coord) => {
+        // Check route cache first
+        const cachedRoute = getCachedRoute(waypointsWithCoords, currentRouteType)
+        if (cachedRoute) {
+          console.log('Using cached route')
+          projectedPath = cachedRoute.map((coord) => {
             const projected = projection!(coord)
             return projected
               ? ([projected[0], projected[1]] as [number, number])
               : ([0, 0] as [number, number])
           })
-        } catch (error) {
-          console.error('Failed to fetch routes, using straight lines:', error)
-          // Fallback to straight lines between waypoints
-          projectedPath = projectedWaypoints.map(
-            (wp) => [wp.x, wp.y] as [number, number]
-          )
+          recalculateDistances()
+        } else {
+          // Fetch routes in background
+          fetchJourneyRoutes(waypointsWithCoords, currentRouteType)
+            .then((routeCoordinates) => {
+              // Cache the route
+              cacheRoute(waypointsWithCoords, currentRouteType, routeCoordinates)
+
+              // Simplify the route for performance
+              const simplifiedRoute = simplifyRoute(routeCoordinates, 0.01)
+              console.log(
+                `Route loaded: ${routeCoordinates.length} → ${simplifiedRoute.length} points`
+              )
+
+              // Project all route coordinates to canvas coordinates
+              projectedPath = simplifiedRoute.map((coord) => {
+                const projected = projection!(coord)
+                return projected
+                  ? ([projected[0], projected[1]] as [number, number])
+                  : ([0, 0] as [number, number])
+              })
+              recalculateDistances()
+            })
+            .catch((error) => {
+              console.error('Failed to fetch routes:', error)
+              // Keep using straight lines
+            })
         }
       }
-
-      // Pre-calculate cumulative distances for smooth interpolation
-      cumulativeDistances = [0]
-      for (let i = 1; i < projectedPath.length; i++) {
-        const dx = projectedPath[i][0] - projectedPath[i - 1][0]
-        const dy = projectedPath[i][1] - projectedPath[i - 1][1]
-        const segmentLength = Math.sqrt(dx * dx + dy * dy)
-        cumulativeDistances.push(cumulativeDistances[i - 1] + segmentLength)
-      }
-      totalPathLength = cumulativeDistances[cumulativeDistances.length - 1] || 1
-
-      isLoaded.value = true
     } catch (error) {
       console.error('Failed to load map:', error)
     }
