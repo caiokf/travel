@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { loadJourney, loadJourneyStory } from '../services/journeyService'
-import type { Journey, JourneyStory, ContentBlock } from '../types'
+import { useJourneyScrollProgress } from '../composables/useJourneyScrollProgress'
+import { useJourneyMap } from '../composables/useJourneyMap'
+import type { Journey, JourneyStory } from '../types'
 import HeroHeader from '../components/HeroHeader.vue'
+import StorySection from '../components/StorySection.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,9 +16,52 @@ const story = ref<JourneyStory | null>(null)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
+// Canvas reference for the map
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+const canvasWidth = ref(window.innerWidth)
+const canvasHeight = ref(window.innerHeight)
+
 const slug = computed(() => route.params.slug as string)
 
+// Extract waypoints and countries from journey for map
+const waypoints = computed(() => journey.value?.waypoints || [])
+const countries = computed(() => journey.value?.countries || [])
+
+// Scroll progress tracking
+const { scrollProgress, waypointsWithProgress } =
+  useJourneyScrollProgress(waypoints)
+
+// D3 Map rendering
+useJourneyMap({
+  waypoints: waypointsWithProgress,
+  countries,
+  scrollProgress,
+  canvasRef,
+})
+
+// Convert story sections to StorySection format expected by component
+const storySections = computed(() => {
+  if (!story.value) return []
+
+  return story.value.sections.map((section) => ({
+    id: section.id,
+    waypointId: section.waypointId,
+    title: section.title,
+    subtitle: section.subtitle,
+    intro: undefined,
+    blocks: section.blocks,
+  }))
+})
+
+const updateCanvasSize = () => {
+  canvasWidth.value = window.innerWidth
+  canvasHeight.value = window.innerHeight
+}
+
 onMounted(async () => {
+  updateCanvasSize()
+  window.addEventListener('resize', updateCanvasSize)
+
   try {
     const [journeyData, storyData] = await Promise.all([
       loadJourney(slug.value),
@@ -37,25 +83,12 @@ onMounted(async () => {
   }
 })
 
+onUnmounted(() => {
+  window.removeEventListener('resize', updateCanvasSize)
+})
+
 function goBack() {
   router.push('/')
-}
-
-function renderBlock(block: ContentBlock): string {
-  switch (block.type) {
-    case 'paragraph':
-      return `<p>${block.content}</p>`
-    case 'quote':
-      return `<blockquote><p>${block.content}</p>${block.author ? `<cite>— ${block.author}</cite>` : ''}</blockquote>`
-    case 'image':
-      return `<figure><img src="${block.src}" alt="${block.caption || ''}" />${block.caption ? `<figcaption>${block.caption}</figcaption>` : ''}</figure>`
-    case 'heading':
-      return `<h${block.level || 3}>${block.content}</h${block.level || 3}>`
-    case 'divider':
-      return '<hr />'
-    default:
-      return ''
-  }
 }
 </script>
 
@@ -72,9 +105,19 @@ function renderBlock(block: ContentBlock): string {
       <button @click="goBack">Back to Home</button>
     </div>
 
-    <!-- Journey content -->
+    <!-- Journey content with map -->
     <template v-else-if="journey">
-      <!-- Hero -->
+      <!-- Fixed Map Canvas (behind everything) -->
+      <div class="map-container">
+        <canvas
+          ref="canvasRef"
+          :width="canvasWidth"
+          :height="canvasHeight"
+          class="map-canvas"
+        />
+      </div>
+
+      <!-- Hero Header -->
       <HeroHeader
         :title="journey.title"
         :subtitle="journey.subtitle"
@@ -82,59 +125,36 @@ function renderBlock(block: ContentBlock): string {
         :background-image="journey.heroImage"
       />
 
-      <!-- Journey meta -->
-      <div class="journey-view__meta">
-        <div class="journey-view__meta-item">
-          <span class="journey-view__meta-label">Duration</span>
-          <span class="journey-view__meta-value">{{ journey.duration }}</span>
+      <!-- Intro Quote / Journey Meta -->
+      <section class="intro-section">
+        <div class="intro-content">
+          <p class="intro-quote">{{ journey.description }}</p>
+          <div class="intro-meta">
+            <span>{{ journey.duration }}</span>
+            <span class="divider">•</span>
+            <span>{{ journey.distance }}</span>
+            <span class="divider">•</span>
+            <span>{{ journey.countries.join(', ') }}</span>
+          </div>
         </div>
-        <div class="journey-view__meta-item">
-          <span class="journey-view__meta-label">Distance</span>
-          <span class="journey-view__meta-value">{{ journey.distance }}</span>
-        </div>
-        <div class="journey-view__meta-item">
-          <span class="journey-view__meta-label">Countries</span>
-          <span class="journey-view__meta-value">{{
-            journey.countries.join(', ')
-          }}</span>
-        </div>
-        <div class="journey-view__meta-item">
-          <span class="journey-view__meta-label">Date</span>
-          <span class="journey-view__meta-value">{{ journey.dateRange }}</span>
-        </div>
-      </div>
+      </section>
 
-      <!-- Story sections -->
-      <div class="journey-view__content">
-        <article
-          v-for="section in story?.sections"
+      <!-- Story Content (text on left with gradient) -->
+      <div class="text">
+        <StorySection
+          v-for="(section, index) in storySections"
           :key="section.id"
-          class="journey-view__section"
-        >
-          <header class="journey-view__section-header">
-            <h2 v-if="section.title" class="journey-view__section-title">
-              {{ section.title }}
-            </h2>
-            <p v-if="section.subtitle" class="journey-view__section-subtitle">
-              {{ section.subtitle }}
-            </p>
-          </header>
-
-          <div
-            class="journey-view__section-content"
-            v-html="section.blocks.map(renderBlock).join('')"
-          ></div>
-        </article>
+          :section="section"
+          :is-first="index === 0"
+        />
       </div>
 
       <!-- Footer -->
-      <footer class="journey-view__footer">
-        <p class="journey-view__footer-text">
+      <footer class="content--related">
+        <p class="info">
           The journey continues. Every road leads somewhere new.
         </p>
-        <button class="journey-view__back-btn" @click="goBack">
-          Back to All Journeys
-        </button>
+        <button class="back-btn" @click="goBack">Back to All Journeys</button>
       </footer>
     </template>
   </div>
@@ -168,158 +188,104 @@ function renderBlock(block: ContentBlock): string {
   font-family: inherit;
 }
 
-.journey-view__meta {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 2em;
-  padding: 3em 2em;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e8e8e8;
+/* Map Container - Fixed behind content */
+.map-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
 }
 
-.journey-view__meta-item {
+.map-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Intro Section */
+.intro-section {
+  position: relative;
+  z-index: 1000;
+  min-height: 50vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.25em;
+  justify-content: center;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(255, 255, 255, 0.7) 75%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
-.journey-view__meta-label {
-  font-size: 0.7em;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: #9d9c95;
-  font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial,
-    sans-serif;
-}
-
-.journey-view__meta-value {
-  font-size: 1.1em;
-  color: #5f646c;
-  font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
-    'Times New Roman', serif;
-}
-
-.journey-view__content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 4em 2em;
-}
-
-.journey-view__section {
-  margin-bottom: 4em;
-}
-
-.journey-view__section:last-child {
-  margin-bottom: 0;
-}
-
-.journey-view__section-header {
-  margin-bottom: 2em;
+.intro-content {
+  max-width: 600px;
+  padding: 4em 3em;
   text-align: center;
 }
 
-.journey-view__section-title {
+.intro-quote {
   font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
     'Times New Roman', serif;
-  font-size: 2em;
-  font-weight: 400;
-  color: #181922;
-  margin: 0 0 0.25em;
-}
-
-.journey-view__section-subtitle {
-  font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial,
-    sans-serif;
-  font-size: 1em;
-  color: #9d9c95;
-  margin: 0;
-  font-style: italic;
-}
-
-.journey-view__section-content {
-  font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial,
-    sans-serif;
-  font-size: 1.1em;
-  line-height: 1.8;
+  font-size: 1.5em;
+  line-height: 1.6;
   color: #5f646c;
-}
-
-.journey-view__section-content :deep(p) {
+  font-style: italic;
   margin: 0 0 1.5em;
 }
 
-.journey-view__section-content :deep(blockquote) {
-  margin: 2em 0;
-  padding: 1.5em 2em;
-  background: #f8f9fa;
-  border-left: 3px solid #c75050;
-  font-style: italic;
-}
-
-.journey-view__section-content :deep(blockquote p) {
-  margin: 0;
-}
-
-.journey-view__section-content :deep(blockquote cite) {
-  display: block;
-  margin-top: 1em;
+.intro-meta {
+  font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial,
+    sans-serif;
   font-size: 0.9em;
   color: #9d9c95;
-  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.journey-view__section-content :deep(figure) {
-  margin: 2em 0;
+.intro-meta .divider {
+  margin: 0 0.75em;
 }
 
-.journey-view__section-content :deep(figure img) {
-  width: 100%;
-  border-radius: 4px;
+/* Story Text Container - positioned on the left */
+.text {
+  position: relative;
+  padding: 5em 3em;
+  z-index: 1000;
+  /* Subtle gradient fade to let map show through on the right */
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.9) 60%,
+    rgba(255, 255, 255, 0.5) 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
-.journey-view__section-content :deep(figcaption) {
-  margin-top: 0.75em;
-  font-size: 0.85em;
-  color: #9d9c95;
+/* Related/Footer */
+.content--related {
   text-align: center;
-}
-
-.journey-view__section-content :deep(hr) {
-  border: none;
-  border-top: 1px solid #e8e8e8;
-  margin: 3em 0;
-}
-
-.journey-view__section-content :deep(h3) {
-  font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
-    'Times New Roman', serif;
-  font-size: 1.4em;
-  font-weight: 400;
-  color: #181922;
-  margin: 2em 0 1em;
-}
-
-.journey-view__footer {
-  text-align: center;
+  position: relative;
+  z-index: 1000;
   padding: 6em 2em;
   background: #181922;
   color: #fff;
 }
 
-.journey-view__footer-text {
+.info {
+  font-size: 1.5em;
+  padding: 0 0 2em;
   font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
     'Times New Roman', serif;
-  font-size: 1.5em;
-  color: #d1d2d2;
-  margin: 0 0 2em;
   max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
+  color: #d1d2d2;
 }
 
-.journey-view__back-btn {
+.back-btn {
   padding: 1em 2em;
   background: transparent;
   color: #47dbb4;
@@ -334,34 +300,35 @@ function renderBlock(block: ContentBlock): string {
   transition: all 0.3s ease;
 }
 
-.journey-view__back-btn:hover {
+.back-btn:hover {
   background: #47dbb4;
   color: #181922;
 }
 
 @media (max-width: 720px) {
-  .journey-view__meta {
-    gap: 1.5em;
-    padding: 2em 1em;
+  .intro-section {
+    min-height: auto;
+    background: rgba(255, 255, 255, 0.95);
   }
 
-  .journey-view__content {
+  .intro-content {
+    padding: 3em 1.5em;
+  }
+
+  .intro-quote {
+    font-size: 1.2em;
+  }
+
+  .text {
     padding: 2em 1.5em;
+    background: rgba(255, 255, 255, 0.95);
   }
 
-  .journey-view__section-title {
-    font-size: 1.5em;
-  }
-
-  .journey-view__section-content {
-    font-size: 1em;
-  }
-
-  .journey-view__footer {
+  .content--related {
     padding: 4em 1.5em;
   }
 
-  .journey-view__footer-text {
+  .info {
     font-size: 1.2em;
   }
 }
