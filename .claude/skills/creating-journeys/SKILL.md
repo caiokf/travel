@@ -1,275 +1,243 @@
 ---
 name: creating-journeys
-description: Use when creating new interactive storytelling journeys with maps - guides generation of waypoints, story sections, and geographic coordinates following established patterns
+description: Use when user wants to write about a journey or trip they took - interviews them for vivid details and stories, then delegates to Writer agent to create markdown file with proper frontmatter and waypoint structure
 ---
 
 # Creating Journeys
 
 ## Overview
 
-This skill enables automated generation of interactive storytelling journeys. Given a list of places and a brief description, generate complete journey data including waypoints with geographic coordinates, story sections with evocative travel-journal style content, and map configuration.
+Create markdown journey files through deep interviewing. Probe for vivid details and emotional moments before writing. Delegate final writing to Writer agent (Task tool with subagent_type="Writer").
 
-## When to Use
+Journey files live in `public/journeys/[slug]/` folders containing:
+- `journey.md` - the journey markdown file
+- `hero.png` - hero image for the header
+- `thumbnail.png` - thumbnail for the timeline
+- `route.json` - pre-generated road routes (created with `/generate-route` skill)
 
-**Use this skill when:**
+## Process
 
-- Creating a new storytelling journey from a list of places
-- Adding waypoints and story sections to an existing journey
-- Writing travel-journal style content for locations
-- Setting up map coordinates for a route
+### Phase 1: Interview (You do this)
 
-**Don't use for:**
+**Start broad, then dig into interesting threads:**
 
-- Modifying map rendering logic (see `useD3Map.ts`)
-- Changing routing service configuration
-- Adding new Vue components
+1. "What was this journey?" - Get the basics (where, when, how long)
+2. "What moment still sticks with you?" - Find the emotional core
+3. "Tell me more about that..." - Probe the interesting parts
 
-## Core Pattern
+**Keep probing until you understand:**
+- The 2-4 key moments/turning points
+- Sensory details (weather, sounds, smells, textures)
+- The people encountered and what made them memorable
+- What the journey meant to them / what changed
 
-### Waypoint Data Structure
+**Also gather waypoint data:**
+- List of locations visited (in order)
+- Dates at each location (or approximate)
+- If user has Polarsteps/GPS data, get coordinates and weather
 
-```typescript
-import type { Waypoint } from '../types'
+**Red flags - you don't have enough yet if:**
+- You only know places and dates
+- You haven't heard a specific story with dialogue or detail
+- You don't know what made this journey different from others
 
-export const waypoints: Waypoint[] = [
-  {
-    id: 'city-name',        // lowercase, kebab-case
-    name: 'Display Name',   // Can include accents (e.g., "Lisboa")
-    x: 180,                 // Canvas X coordinate (viewBox 2000x1400)
-    y: 780,                 // Canvas Y coordinate (viewBox 2000x1400)
-    pathPosition: 0         // 0-1 position along journey (0=start, 1=end)
-  }
-]
+### Phase 2: Write (Writer agent does this)
+
+**IMPORTANT:** Use the Task tool with `subagent_type: "Writer"` - NOT a skill.
+
+First, generate a nanoid for the journey ID:
+```bash
+node -e "const {nanoid} = require('/Users/caiokf/development/caiokf/travel/node_modules/.pnpm/nanoid@3.3.11/node_modules/nanoid/index.cjs'); console.log(nanoid())"
 ```
 
-### Story Section Structure
-
-```typescript
-import type { StorySection } from '../types'
-
-export const storySections: StorySection[] = [
-  {
-    id: 'city-name',
-    waypointId: 'city-name',    // Links to waypoint.id
-    title: 'City Name',
-    subtitle: 'Evocative Tagline',
-    intro: 'Optional intro paragraph with scene-setting.',
-    blocks: [
-      {
-        type: 'paragraph',
-        content: 'Story content with sensory details...'
-      },
-      {
-        type: 'image',
-        src: '/img/journey/1.jpg',
-        caption: 'Descriptive caption for the image'
-      },
-      {
-        type: 'quote',
-        content: 'Quote text in original language',
-        author: 'Author Name — Translation if needed'
-      },
-      {
-        type: 'gallery',
-        images: ['/img/journey/2.jpg', '/img/journey/3.jpg']
-      }
-    ]
-  }
-]
-```
-
-### Geographic Coordinates (for Map)
-
-```typescript
-// In useD3Map.ts - format is [longitude, latitude] (GeoJSON convention)
-const cityCoordinates: Record<string, [number, number]> = {
-  lisbon: [-9.1393, 38.7223],
-  sevilla: [-5.9845, 37.3891],
-  paris: [2.3522, 48.8566]
-}
-```
-
-### Trip Metadata
-
-```typescript
-import type { Trip } from '../types'
-
-export const trips: Trip[] = [
-  {
-    id: 'journey-slug',              // URL-safe lowercase
-    title: 'The Journey Title',
-    subtitle: 'From X to Y',
-    description: 'Brief description of the journey.',
-    thumbnail: '/img/trips/thumb.jpg',
-    heroImage: '/img/hero.jpg',
-    route: '/trips/journey-slug'
-  }
-]
-```
-
-## Quick Reference
-
-### Content Block Types
-
-| Type | Required Fields | Optional Fields |
-|------|-----------------|-----------------|
-| `paragraph` | `content` | - |
-| `image` | `src` | `caption` |
-| `quote` | `content` | `author` |
-| `gallery` | `images` (array) | - |
-
-### Coordinate Format
-
-| Component | Format | Example |
-|-----------|--------|---------|
-| Longitude | Decimal degrees, West is negative | `-9.1393` |
-| Latitude | Decimal degrees, South is negative | `38.7223` |
-| Order | `[longitude, latitude]` | `[-9.1393, 38.7223]` |
-
-### Path Position Values
-
-| Position | Value | Notes |
-|----------|-------|-------|
-| First waypoint | `0` | Journey start |
-| Last waypoint | `1` | Journey end |
-| Middle | Proportional | e.g., 4th of 7 = `0.50` |
-
-## Implementation
-
-### Step 1: Gather Input
-
-Collect from user:
-- Ordered list of places (cities/locations)
-- Brief description or theme for the journey
-- Any specific stories or highlights to include
-
-### Step 2: Look Up Coordinates
-
-For each place, find geographic coordinates:
-- Use Google Maps, OpenStreetMap, or similar
-- Format: `[longitude, latitude]` (note: lon first, not lat)
-- Add to `cityCoordinates` in `useD3Map.ts`
-
-### Step 3: Calculate Waypoint Positions
-
-```typescript
-// For N waypoints, distribute pathPosition evenly
-const pathPositions = waypoints.map((_, i, arr) =>
-  i / (arr.length - 1)  // 0, 0.33, 0.67, 1 for 4 waypoints
-)
-
-// Canvas coordinates (x, y) are approximate - roughly match geography
-// viewBox is 2000x1400, center around ~1000x700
-```
-
-### Step 4: Write Story Content
-
-Follow the content style guide (see below). For each location:
-1. Write 3-4 paragraphs with sensory details
-2. Add 1-2 images with evocative captions
-3. Include quotes where appropriate
-4. Create an intro for the first section
-
-### Step 5: Update Files
-
-| File | What to Add |
-|------|-------------|
-| `src/data/story.ts` | Waypoints array, StorySections array |
-| `src/composables/useD3Map.ts` | City coordinates to `cityCoordinates` |
-| `src/data/trips.ts` | Trip metadata entry |
-| `public/img/journey/` | Journey images |
-
-## Content Style Guide
-
-### Voice and Tone
-
-- **First person plural**: "We wandered...", "The city greeted us..."
-- **Present tense for immediacy**: "The streets echo..."
-- **Past tense for reflection**: "We understood then why..."
-- **Evocative and sensory**: Sounds, scents, textures, light
-
-### Paragraph Structure
-
-- 2-4 sentences per paragraph
-- Mix observation, action, and reflection
-- Include specific details: place names, local foods, historical facts
-- Use literary devices: metaphors, personification
-
-### Example Style
+Then dispatch the Writer agent with the full structure:
 
 ```
-"Lisbon greeted us with golden light reflecting off the Tagus River,
-the city's seven hills rising like ancient guardians. We wandered
-through the narrow alleys of Alfama, the oldest district, where
-laundry hung between buildings and the scent of grilled sardines
-filled the air."
+Task tool call:
+- subagent_type: "Writer"
+- prompt: |
+    Write a journey markdown file for public/journeys/[slug]/journey.md
+
+    FRONTMATTER (use this exact structure):
+    ---
+    id: [the nanoid you generated]
+    slug: [kebab-case-journey-name]
+    title: [evocative title]
+    subtitle: [short tagline]
+    description: [1-2 sentence hook]
+
+    # Dates
+    date-start: [ISO date like 2016-03-13]
+    date-end: [ISO date like 2016-03-31]
+    duration: [X days]
+
+    # Geography
+    countries: [array of countries]
+    distance: [approximate distance]
+
+    # Display
+    thumbnail: /img/journeys/[slug]/thumb.jpg
+    hero-image: /img/journeys/[slug]/hero.jpg
+    status: completed
+
+    # Tags
+    tags: [array of relevant tags]
+
+    # Waypoints (one per location)
+    waypoints:
+      - id: [kebab-case-location]
+        name: [Display Name]
+        lat: [latitude]
+        lon: [longitude]
+        country: [Country]
+        date: [ISO date]
+        weather: { condition: [weather], temp: [temp] }
+      # ... more waypoints
+    ---
+
+    BODY STRUCTURE:
+    Each waypoint section follows this pattern:
+
+    <!-- waypoint: [waypoint-id] -->
+    # [Location Name]
+    ## [Evocative Subtitle]
+
+    [Story content with sensory details...]
+
+    ![Image description](/img/journeys/[slug]/[image].jpg)
+    *Caption for the image*
+
+    > "Quote from someone"
+    > — Person's name
+
+    ---
+
+    STORY GATHERED:
+    [Include all the details you gathered - moments, sensory details, people, meaning]
+
+    STYLE:
+    - First person, present tense for immediacy
+    - Rich sensory details
+    - Let the moments breathe - don't rush through them
+    - Include dialogue where natural
+    - Each waypoint section: 150-400 words
 ```
 
-**Key elements:**
-- Sensory detail: "golden light", "scent of sardines"
-- Geographic context: "Tagus River", "seven hills"
-- Personification: "city greeted us"
-- Local authenticity: "Alfama", specific dishes
+**Do NOT:**
+- Write the content yourself - delegate to Writer
+- Make up a nanoid - generate it with the command above
+- Use a Skill tool - use Task with subagent_type="Writer"
+- Skip waypoint markers - every section needs `<!-- waypoint: id -->`
 
-### Subtitles
+## Frontmatter Reference
 
-Use evocative taglines, not just descriptions:
-- "Where the Journey Begins" (not "Starting Point")
-- "The Last Moorish Kingdom" (not "Islamic Heritage")
-- "Gaudi's Dreamscape" (not "Modernist Architecture")
+| Field | Format | Example |
+|-------|--------|---------|
+| id | nanoid | `V1StGXR8_Z5jdHi6B-myT` |
+| slug | kebab-case | `winter-hitchhiking-scandinavia` |
+| title | string | `Frozen Thumbs, Open Doors` |
+| subtitle | string | `Hitchhiking Arctic Scandinavia` |
+| description | string | `Three weeks hitchhiking through Arctic Scandinavia...` |
+| date-start | ISO date | `2016-03-13` |
+| date-end | ISO date | `2016-03-31` |
+| duration | string | `19 days` |
+| countries | array | `[Norway, Sweden, Finland]` |
+| distance | string | `~1200 km` |
+| thumbnail | path | `/img/journeys/scandinavia-2016/thumb.jpg` |
+| hero-image | path | `/img/journeys/scandinavia-2016/hero.jpg` |
+| status | enum | `completed` or `planned` |
+| tags | array | `[hitchhiking, winter, arctic]` |
+| waypoints | array | See waypoint structure below |
 
-### Quotes
+### Waypoint Structure
 
-For non-English quotes, format author as:
-```typescript
-author: 'Francisco de Icaza — Give him alms, woman, for there is nothing so cruel as being blind in Granada'
+```yaml
+- id: vardo              # kebab-case, matches <!-- waypoint: id -->
+  name: Vardø            # Display name with accents
+  lat: 70.3706           # Latitude (decimal degrees)
+  lon: 31.1095           # Longitude (decimal degrees)
+  country: Norway        # Country name
+  date: 2016-03-14       # Date arrived (ISO)
+  weather:               # Optional weather data
+    condition: clear-night
+    temp: -1
 ```
+
+## Body Content Structure
+
+```markdown
+<!-- waypoint: vardo -->
+# Vardø
+## The Birdwatcher's House
+
+Story paragraphs here...
+
+![Telescope on third floor](/img/journeys/scandinavia-2016/vardo-telescope.jpg)
+*Looking for seabirds at midnight*
+
+> "This house belongs to a friend in Switzerland"
+> — The driver
+
+More story content...
+
+---
+
+<!-- waypoint: honningsvag -->
+# Honningsvåg
+## Gateway to Nordkapp
+
+Next section...
+```
+
+### Content Block Mapping
+
+| Markdown | Renders As |
+|----------|-----------|
+| Paragraph text | `paragraph` block |
+| `![alt](src)` + `*caption*` | `image` block |
+| `> quote` + `> — author` | `quote` block |
+| `<!-- gallery -->` ... `<!-- /gallery -->` | `gallery` block |
+| `---` | Section divider |
+
+## Image Organization
+
+All images for a journey go in the journey folder: `public/journeys/[slug]/`
+
+Required images:
+- `hero.png` - Hero header background (1920x1080 recommended)
+- `thumbnail.png` - Timeline card thumbnail (800x600 recommended)
+
+Optional waypoint images:
+- `[waypoint-id].jpg` - Images for specific waypoints
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
-| Lat/lng order reversed | Use `[longitude, latitude]`, not `[lat, lng]` |
-| Missing pathPosition | Every waypoint needs `pathPosition` from 0-1 |
-| Generic content | Add specific local details, foods, historical facts |
-| Prose too long | Keep paragraphs to 2-4 sentences |
-| No sensory details | Include sights, sounds, scents in every section |
-| Mismatched IDs | `waypointId` must exactly match `waypoint.id` |
+| Writing immediately | Interview first - you need stories, not just facts |
+| Checklist questions | Follow interesting threads, ask "tell me more" |
+| Writing content yourself | Delegate to Writer agent with gathered details |
+| Missing waypoint markers | Every section needs `<!-- waypoint: id -->` before heading |
+| Waypoint ID mismatch | Body `<!-- waypoint: X -->` must match frontmatter waypoint id |
+| Missing coordinates | Every waypoint needs lat/lon for map rendering |
+| Thin story details | Keep probing until you have dialogue, sensory details, emotional moments |
 
-## File Placement
+## File Location
+
+All journeys go in `public/journeys/[slug]/` with this structure:
 
 ```
-src/
-  data/
-    story.ts      # Waypoints and story sections
-    trips.ts      # Trip metadata for listing page
-  composables/
-    useD3Map.ts   # Add city coordinates here
-public/
-  img/
-    journey/      # Journey images (1.jpg, 2.jpg, etc.)
-    trips/        # Trip thumbnails
+public/journeys/winter-hitchhiking-scandinavia/
+├── journey.md      # The markdown file
+├── hero.png        # Hero image (1920x1080 recommended)
+├── thumbnail.png   # Timeline thumbnail (800x600 recommended)
+└── route.json      # Generated with /generate-route skill
 ```
 
-## Edge Cases
+## After Creating a Journey
 
-### Unknown Locations
-
-Look up coordinates at:
-- Google Maps: Right-click > "What's here?"
-- OpenStreetMap: Click location for coordinates
-- Format as decimal degrees with 4 decimal places
-
-### Non-European Journeys
-
-The current map projection is centered on Western Europe. For other regions:
-- Adjust projection center in `useD3Map.ts`
-- Modify scale for appropriate zoom level
-- Update `journeyCountries` array for highlighting
-
-### Missing Images
-
-Content works without images initially:
-- Omit image blocks until photos are available
-- Use placeholder captions noting "Photo coming soon"
-- Add gallery blocks for multiple photos of same location
+1. Create the folder: `mkdir -p public/journeys/[slug]`
+2. Save the markdown as `journey.md` in the folder
+3. Add hero.png and thumbnail.png images
+4. Run `/generate-route [slug]` to create route.json
+5. Add the slug to `JOURNEY_SLUGS` array in `src/services/journeyService.ts`

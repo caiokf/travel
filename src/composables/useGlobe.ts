@@ -1,15 +1,11 @@
 import { ref, onMounted, onUnmounted, watch, type Ref } from 'vue'
 import * as d3 from 'd3'
-import type { FeatureCollection, Feature, Geometry } from 'geojson'
-import * as topojson from 'topojson-client'
 
-// World Atlas TopoJSON URL (Natural Earth 110m for performance)
-const WORLD_ATLAS_URL =
-  'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
+// Earth texture (equirectangular projection) - using unpkg for CORS support
+const EARTH_TEXTURE_URL =
+  'https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg'
 
 // Colors
-const OCEAN_COLOR = '#d4dde6'
-const LAND_COLOR = '#e8edef'
 const DEFAULT_ARC_COLOR = '#c75050'
 
 export interface GlobeJourney {
@@ -37,10 +33,14 @@ export function useGlobe(options: GlobeOptions) {
 
   const isLoaded = ref(false)
 
-  let worldData: FeatureCollection | null = null
   let projection: d3.GeoProjection | null = null
-  let pathGenerator: d3.GeoPath | null = null
   let animationFrame: number | null = null
+
+  // Earth texture
+  let earthTexture: HTMLImageElement | null = null
+  let textureCanvas: HTMLCanvasElement | null = null
+  let textureCtx: CanvasRenderingContext2D | null = null
+  let textureData: ImageData | null = null
 
   // Rotation state
   let currentRotation: [number, number, number] = [0, -20, 0] // [lambda, phi, gamma]
@@ -51,36 +51,76 @@ export function useGlobe(options: GlobeOptions) {
   let lastTime = 0
   let isAutoRotating = autoRotate
 
-  // Load world geography data
-  const loadWorld = async (): Promise<void> => {
-    try {
-      const response = await fetch(WORLD_ATLAS_URL)
-      const topoData = await response.json()
+  // Load Earth texture
+  const loadTexture = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        earthTexture = img
 
-      // Convert TopoJSON to GeoJSON
-      worldData = topojson.feature(
-        topoData,
-        topoData.objects.countries
-      ) as unknown as FeatureCollection
+        // Create offscreen canvas to read pixel data
+        textureCanvas = document.createElement('canvas')
+        textureCanvas.width = img.width
+        textureCanvas.height = img.height
+        textureCtx = textureCanvas.getContext('2d')
 
-      // Set up orthographic projection
-      const canvas = canvasRef.value
-      if (canvas) {
-        const size = Math.min(canvas.width, canvas.height) * 0.45
+        if (textureCtx) {
+          textureCtx.drawImage(img, 0, 0)
+          textureData = textureCtx.getImageData(0, 0, img.width, img.height)
+        }
 
-        projection = d3
-          .geoOrthographic()
-          .scale(size)
-          .translate([canvas.width / 2, canvas.height / 2])
-          .rotate(currentRotation)
-          .clipAngle(90)
-
-        pathGenerator = d3.geoPath().projection(projection).context(null)
+        resolve()
       }
+      img.onerror = reject
+      img.src = EARTH_TEXTURE_URL
+    })
+  }
 
-      isLoaded.value = true
+  // Sample texture at given lat/lon
+  const sampleTexture = (
+    lon: number,
+    lat: number
+  ): [number, number, number] | null => {
+    if (!textureData || !earthTexture) return null
+
+    // Convert lat/lon to texture coordinates (equirectangular)
+    // lon: -180 to 180 -> 0 to width
+    // lat: 90 to -90 -> 0 to height
+    const x = ((lon + 180) / 360) * earthTexture.width
+    const y = ((90 - lat) / 180) * earthTexture.height
+
+    const px = Math.floor(x) % earthTexture.width
+    const py = Math.max(0, Math.min(earthTexture.height - 1, Math.floor(y)))
+
+    const idx = (py * earthTexture.width + px) * 4
+
+    return [textureData.data[idx], textureData.data[idx + 1], textureData.data[idx + 2]]
+  }
+
+  // Load globe resources
+  const loadGlobe = async (): Promise<void> => {
+    // Set up orthographic projection first (always needed)
+    const canvas = canvasRef.value
+    if (canvas) {
+      const size = Math.min(canvas.width, canvas.height) * 0.45
+
+      projection = d3
+        .geoOrthographic()
+        .scale(size)
+        .translate([canvas.width / 2, canvas.height / 2])
+        .rotate(currentRotation)
+        .clipAngle(90)
+    }
+
+    isLoaded.value = true
+
+    // Try to load texture in background (non-blocking)
+    try {
+      await loadTexture()
+      console.log('Earth texture loaded successfully')
     } catch (error) {
-      console.error('Failed to load world data:', error)
+      console.warn('Failed to load Earth texture, using fallback colors:', error)
     }
   }
 
@@ -196,46 +236,135 @@ export function useGlobe(options: GlobeOptions) {
     ctx.restore()
   }
 
-  // Draw the ocean (globe background)
-  const drawOcean = (ctx: CanvasRenderingContext2D): void => {
+  // Draw textured globe with optimized rendering
+  const drawTexturedGlobe = (ctx: CanvasRenderingContext2D): void => {
     if (!projection) return
+
+    const canvas = canvasRef.value
+    if (!canvas) return
 
     const [cx, cy] = projection.translate()
     const radius = projection.scale()
 
+    // Fallback to gradient globe if texture not loaded
+    if (!textureData || !earthTexture) {
+      // Draw gradient globe (ocean blue with slight depth)
+      const gradient = ctx.createRadialGradient(
+        cx - radius * 0.3,
+        cy - radius * 0.3,
+        0,
+        cx,
+        cy,
+        radius
+      )
+      gradient.addColorStop(0, '#4a90b8')
+      gradient.addColorStop(0.5, '#2d6a8f')
+      gradient.addColorStop(0.8, '#1a4b77')
+      gradient.addColorStop(1, '#0d2840')
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+      ctx.fillStyle = gradient
+      ctx.fill()
+      ctx.restore()
+
+      // Add atmosphere rim
+      const rimGradient = ctx.createRadialGradient(cx, cy, radius * 0.85, cx, cy, radius * 1.02)
+      rimGradient.addColorStop(0, 'rgba(255, 255, 255, 0)')
+      rimGradient.addColorStop(0.7, 'rgba(135, 206, 250, 0.15)')
+      rimGradient.addColorStop(1, 'rgba(100, 180, 255, 0.4)')
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius * 1.02, 0, Math.PI * 2)
+      ctx.fillStyle = rimGradient
+      ctx.fill()
+      ctx.restore()
+      return
+    }
+
+    // Calculate bounding box for the globe
+    const x0 = Math.floor(cx - radius)
+    const y0 = Math.floor(cy - radius)
+    const x1 = Math.ceil(cx + radius)
+    const y1 = Math.ceil(cy + radius)
+
+    const width = x1 - x0
+    const height = y1 - y0
+
+    // Render at reduced resolution for performance, then scale up
+    const scale = 2 // Render at 1/2 resolution
+    const renderWidth = Math.ceil(width / scale)
+    const renderHeight = Math.ceil(height / scale)
+
+    // Create image data at reduced resolution
+    const imageData = ctx.createImageData(renderWidth, renderHeight)
+    const data = imageData.data
+
+    const radiusSq = radius * radius
+
+    // For each pixel in the reduced bounding box
+    for (let py = 0; py < renderHeight; py++) {
+      for (let px = 0; px < renderWidth; px++) {
+        const screenX = x0 + px * scale
+        const screenY = y0 + py * scale
+
+        // Check if within globe circle (using squared distance)
+        const dx = screenX - cx
+        const dy = screenY - cy
+        const distSq = dx * dx + dy * dy
+
+        if (distSq <= radiusSq) {
+          // Convert screen coordinates to lat/lon using inverse projection
+          const coords = projection.invert?.([screenX, screenY])
+
+          if (coords) {
+            const [lon, lat] = coords
+
+            // Sample the texture
+            const color = sampleTexture(lon, lat)
+
+            if (color) {
+              const idx = (py * renderWidth + px) * 4
+              data[idx] = color[0]
+              data[idx + 1] = color[1]
+              data[idx + 2] = color[2]
+              data[idx + 3] = 255
+            }
+          }
+        }
+      }
+    }
+
+    // Draw the reduced resolution image scaled up
+    // Create a temp canvas to scale up
+    const tempCanvas = document.createElement('canvas')
+    tempCanvas.width = renderWidth
+    tempCanvas.height = renderHeight
+    const tempCtx = tempCanvas.getContext('2d')
+
+    if (tempCtx) {
+      tempCtx.putImageData(imageData, 0, 0)
+
+      // Draw scaled up with smoothing
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      ctx.drawImage(tempCanvas, 0, 0, renderWidth, renderHeight, x0, y0, width, height)
+    }
+
+    // Add subtle atmosphere rim lighting
+    const rimGradient = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.02)
+    rimGradient.addColorStop(0, 'rgba(255, 255, 255, 0)')
+    rimGradient.addColorStop(0.6, 'rgba(135, 206, 250, 0.08)')
+    rimGradient.addColorStop(0.85, 'rgba(135, 206, 250, 0.2)')
+    rimGradient.addColorStop(1, 'rgba(100, 180, 255, 0.4)')
+
     ctx.save()
     ctx.beginPath()
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2)
-    ctx.fillStyle = OCEAN_COLOR
+    ctx.arc(cx, cy, radius * 1.02, 0, Math.PI * 2)
+    ctx.fillStyle = rimGradient
     ctx.fill()
-    ctx.restore()
-  }
-
-  // Draw land masses
-  const drawLand = (ctx: CanvasRenderingContext2D): void => {
-    if (!worldData || !pathGenerator || !projection) return
-
-    ctx.save()
-
-    // Update path generator with canvas context
-    const canvasPathGenerator = d3.geoPath().projection(projection).context(ctx)
-
-    ctx.beginPath()
-    worldData.features.forEach((feature: Feature<Geometry>) => {
-      canvasPathGenerator(feature)
-    })
-    ctx.fillStyle = LAND_COLOR
-    ctx.fill()
-
-    // Draw country borders
-    ctx.beginPath()
-    worldData.features.forEach((feature: Feature<Geometry>) => {
-      canvasPathGenerator(feature)
-    })
-    ctx.strokeStyle = '#c8d4d8'
-    ctx.lineWidth = 0.5
-    ctx.stroke()
-
     ctx.restore()
   }
 
@@ -349,6 +478,12 @@ export function useGlobe(options: GlobeOptions) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // Update projection to match current canvas size (handles initial sizing and resize)
+    const size = Math.min(canvas.width, canvas.height) * 0.45
+    if (size > 0) {
+      projection.scale(size).translate([canvas.width / 2, canvas.height / 2])
+    }
+
     // Calculate delta time for smooth animation
     const deltaTime = timestamp - lastTime
     lastTime = timestamp
@@ -378,10 +513,9 @@ export function useGlobe(options: GlobeOptions) {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    // Draw in order: atmosphere, ocean, land, journeys
+    // Draw in order: atmosphere, textured globe, journeys
     drawAtmosphere(ctx)
-    drawOcean(ctx)
-    drawLand(ctx)
+    drawTexturedGlobe(ctx)
     drawJourneys(ctx)
   }
 
@@ -430,7 +564,7 @@ export function useGlobe(options: GlobeOptions) {
   )
 
   onMounted(async () => {
-    await loadWorld()
+    await loadGlobe()
     startAnimation()
 
     // Handle resize events

@@ -4,12 +4,14 @@ import type { FeatureCollection, Feature, Geometry } from 'geojson'
 import type { WaypointWithProgress } from './useJourneyScrollProgress'
 import { fetchJourneyRoutes, simplifyRoute } from '../services/routingService'
 import { getWorldMap, getCachedRoute, cacheRoute } from '../services/mapCache'
+import { loadJourneyRoute } from '../services/journeyService'
 
 interface JourneyMapOptions {
   waypoints: Ref<WaypointWithProgress[]>
   countries: Ref<string[]>
   scrollProgress: Ref<number>
   canvasRef: Ref<HTMLCanvasElement | null>
+  slug?: Ref<string>
   // Optional configuration from markdown frontmatter
   mapZoom?: Ref<number | undefined>
   mapCenter?: Ref<[number, number] | undefined>
@@ -17,7 +19,7 @@ interface JourneyMapOptions {
 }
 
 export function useJourneyMap(options: JourneyMapOptions) {
-  const { waypoints, countries, scrollProgress, canvasRef, mapZoom, mapCenter, routeType } = options
+  const { waypoints, countries, scrollProgress, canvasRef, slug, mapZoom, mapCenter, routeType } = options
 
   const isLoaded = ref(false)
   const cameraPosition = ref({ x: 0, y: 0 })
@@ -110,6 +112,25 @@ export function useJourneyMap(options: JourneyMapOptions) {
       const currentRouteType = routeType?.value ?? 'driving'
 
       if (currentRouteType !== 'straight') {
+        const currentSlug = slug?.value
+
+        // Try loading pre-generated route first
+        if (currentSlug) {
+          const preGeneratedRoute = await loadJourneyRoute(currentSlug)
+          if (preGeneratedRoute) {
+            console.log(`Using pre-generated route: ${preGeneratedRoute.length} points`)
+            projectedPath = preGeneratedRoute.map((coord) => {
+              const projected = projection!(coord)
+              return projected
+                ? ([projected[0], projected[1]] as [number, number])
+                : ([0, 0] as [number, number])
+            })
+            recalculateDistances()
+            return // Route loaded, no need to fetch from API
+          }
+        }
+
+        // Fallback to runtime route fetching if no pre-generated route
         const waypointsWithCoords = wps.map((wp) => ({
           id: wp.id,
           coordinates: [wp.lon, wp.lat] as [number, number],

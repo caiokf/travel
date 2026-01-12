@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import { computed, ref, onMounted, onUnmounted } from 'vue'
   import type { Trip } from '../../types'
-  import JourneyCard from './JourneyCard.vue'
 
   const props = defineProps<{
     trips: Trip[]
@@ -11,318 +10,413 @@
     'journey-hover': [tripId: string | null]
   }>()
 
-  // Track which cards are visible for scroll animation
-  const visibleCards = ref<Set<string>>(new Set())
-  const cardRefs = ref<Map<string, HTMLElement>>(new Map())
+  const activeYear = ref<number | null>(null)
+  const yearRefs = ref<Map<number, HTMLElement>>(new Map())
 
-  // Group trips by year
-  const tripsByYear = computed(() => {
-    const grouped = new Map<number, Trip[]>()
-
-    // Sort trips by year (newest first)
-    const sortedTrips = [...props.trips].sort((a, b) => {
+  // Sort trips by date (newest first)
+  const sortedTrips = computed(() => {
+    return [...props.trips].sort((a, b) => {
       const yearA = a.year || 2024
       const yearB = b.year || 2024
-      return yearB - yearA
+      if (yearB !== yearA) return yearB - yearA
+      const monthA = a.month || 1
+      const monthB = b.month || 1
+      return monthB - monthA
     })
+  })
 
-    sortedTrips.forEach((trip) => {
+  // Group by year for display
+  const tripsByYear = computed(() => {
+    const grouped = new Map<number, Trip[]>()
+    sortedTrips.value.forEach((trip) => {
       const year = trip.year || 2024
       if (!grouped.has(year)) {
         grouped.set(year, [])
       }
       grouped.get(year)!.push(trip)
     })
-
     return grouped
   })
 
-  // Get sorted years
-  const sortedYears = computed(() => {
+  // Get unique years
+  const years = computed(() => {
     return Array.from(tripsByYear.value.keys()).sort((a, b) => b - a)
   })
 
-  // Track hovered trip
-  const hoveredTripId = ref<string | null>(null)
-
-  function handleCardHover(tripId: string, isHovered: boolean) {
-    hoveredTripId.value = isHovered ? tripId : null
-    emit('journey-hover', hoveredTripId.value)
+  // Track hovered trip for globe interaction
+  function handleCardHover(tripId: string | null) {
+    emit('journey-hover', tripId)
   }
 
-  // Intersection Observer for scroll animations
-  let observer: IntersectionObserver | null = null
+  // Track failed images
+  const failedImages = ref<Set<string>>(new Set())
 
-  function setCardRef(tripId: string, el: HTMLElement | null) {
+  function handleImageError(tripId: string) {
+    failedImages.value.add(tripId)
+  }
+
+  function setYearRef(year: number, el: HTMLElement | null) {
     if (el) {
-      cardRefs.value.set(tripId, el)
-      if (observer) {
-        observer.observe(el)
+      yearRefs.value.set(year, el)
+    }
+  }
+
+  // Scroll to a specific year
+  function scrollToYear(year: number) {
+    const el = yearRefs.value.get(year)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  // Update active year based on scroll position
+  function handleScroll() {
+    const scrollY = window.scrollY + 200
+
+    for (const [year, el] of yearRefs.value.entries()) {
+      const rect = el.getBoundingClientRect()
+      const top = rect.top + window.scrollY
+
+      if (scrollY >= top) {
+        activeYear.value = year
       }
     }
   }
 
   onMounted(() => {
-    observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const tripId = entry.target.getAttribute('data-trip-id')
-          if (tripId && entry.isIntersecting) {
-            visibleCards.value.add(tripId)
-          }
-        })
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px',
-      }
-    )
-
-    // Observe all existing cards
-    cardRefs.value.forEach((el) => {
-      observer!.observe(el)
-    })
+    if (years.value.length > 0) {
+      activeYear.value = years.value[0]
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
   })
 
   onUnmounted(() => {
-    if (observer) {
-      observer.disconnect()
-      observer = null
-    }
+    window.removeEventListener('scroll', handleScroll)
   })
 </script>
 
 <template>
   <section class="journey-timeline">
-    <div class="journey-timeline__container">
-      <!-- Timeline spine -->
-      <div class="journey-timeline__spine"></div>
-
-      <!-- Year groups -->
-      <div
-        v-for="year in sortedYears"
+    <!-- Sticky year navigation -->
+    <nav class="journey-timeline__years">
+      <button
+        v-for="year in years"
         :key="year"
-        class="journey-timeline__year-group"
+        class="journey-timeline__year-btn"
+        :class="{ 'journey-timeline__year-btn--active': activeYear === year }"
+        @click="scrollToYear(year)"
       >
-        <!-- Year marker -->
-        <div class="journey-timeline__year-marker">
-          <span class="journey-timeline__year">{{ year }}</span>
-          <div class="journey-timeline__year-dot"></div>
-        </div>
+        {{ year }}
+      </button>
+    </nav>
 
-        <!-- Cards for this year -->
+    <!-- Journey cards -->
+    <div class="journey-timeline__content">
+      <div
+        v-for="year in years"
+        :key="year"
+        :ref="(el) => setYearRef(year, el as HTMLElement)"
+        class="journey-timeline__year-section"
+      >
+        <h2 class="journey-timeline__year-title">{{ year }}</h2>
+
         <div class="journey-timeline__cards">
-          <div
+          <article
             v-for="trip in tripsByYear.get(year)"
             :key="trip.id"
-            :ref="(el) => setCardRef(trip.id, el as HTMLElement)"
-            :data-trip-id="trip.id"
-            class="journey-timeline__card-wrapper"
-            :class="{
-              'journey-timeline__card-wrapper--visible': visibleCards.has(
-                trip.id
-              ),
-            }"
+            class="journey-card"
+            @mouseenter="handleCardHover(trip.id)"
+            @mouseleave="handleCardHover(null)"
           >
-            <!-- Connector line -->
-            <div class="journey-timeline__connector"></div>
+            <router-link :to="trip.route" class="journey-card__link">
+              <div class="journey-card__image-container">
+                <img
+                  v-if="!failedImages.has(trip.id)"
+                  :src="trip.thumbnail"
+                  :alt="trip.title"
+                  class="journey-card__image"
+                  loading="lazy"
+                  @error="handleImageError(trip.id)"
+                />
+                <div class="journey-card__placeholder" v-else></div>
+                <div class="journey-card__gradient"></div>
+              </div>
 
-            <JourneyCard
-              :trip="trip"
-              :is-hovered="hoveredTripId === trip.id"
-              @hover="(isHovered) => handleCardHover(trip.id, isHovered)"
-            />
-          </div>
+              <div class="journey-card__content">
+                <div class="journey-card__meta">
+                  <span class="journey-card__date">{{ trip.dateRange }}</span>
+                  <span v-if="trip.duration" class="journey-card__duration">{{ trip.duration }}</span>
+                </div>
+
+                <h3 class="journey-card__title">{{ trip.title }}</h3>
+
+                <p class="journey-card__subtitle">{{ trip.subtitle }}</p>
+
+                <div v-if="trip.countries?.length" class="journey-card__countries">
+                  {{ trip.countries.join(' → ') }}
+                </div>
+              </div>
+            </router-link>
+          </article>
         </div>
       </div>
-
-      <!-- Empty state -->
-      <p v-if="trips.length === 0" class="journey-timeline__empty">
-        No journeys available at the moment.
-      </p>
     </div>
   </section>
 </template>
 
 <style scoped>
   .journey-timeline {
-    width: 100%;
-    padding: 4em 2em;
-    background: #f8f9fa;
-  }
-
-  .journey-timeline__container {
-    max-width: 900px;
-    margin: 0 auto;
     position: relative;
-    padding-left: 120px;
-  }
-
-  /* Vertical spine line */
-  .journey-timeline__spine {
-    position: absolute;
-    left: 100px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
+    padding: 0 0 6em;
     background: linear-gradient(
       to bottom,
-      transparent 0%,
-      #c75050 5%,
-      #c75050 95%,
+      #181922 0%,
+      #1e2530 10%,
+      #252d3a 30%,
+      #2d3748 100%
+    );
+    min-height: 100vh;
+  }
+
+  /* Sticky year navigation */
+  .journey-timeline__years {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    gap: 2em;
+    padding: 1.5em 2em;
+    background: rgba(24, 25, 34, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .journey-timeline__year-btn {
+    background: none;
+    border: none;
+    font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
+    font-size: 1.1em;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 0.5em 0;
+    position: relative;
+    transition: color 0.3s ease;
+  }
+
+  .journey-timeline__year-btn:hover {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .journey-timeline__year-btn--active {
+    color: #fff;
+  }
+
+  .journey-timeline__year-btn--active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background: #c75050;
+  }
+
+  /* Content area */
+  .journey-timeline__content {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 4em 2em;
+  }
+
+  /* Year sections */
+  .journey-timeline__year-section {
+    margin-bottom: 5em;
+  }
+
+  .journey-timeline__year-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .journey-timeline__year-title {
+    font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
+    font-size: 3em;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.15);
+    margin: 0 0 1em;
+    padding-left: 0.25em;
+  }
+
+  /* Cards */
+  .journey-timeline__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 3em;
+  }
+
+  /* Journey Card */
+  .journey-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #181922;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .journey-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+
+  .journey-card__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .journey-card__image-container {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+
+  .journey-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .journey-card:hover .journey-card__image {
+    transform: scale(1.05);
+  }
+
+  .journey-card__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      135deg,
+      #2d3748 0%,
+      #1e2530 50%,
+      #2d3748 100%
+    );
+  }
+
+  .journey-card__gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(24, 25, 34, 1) 0%,
+      rgba(24, 25, 34, 0.6) 40%,
       transparent 100%
     );
   }
 
-  /* Year group */
-  .journey-timeline__year-group {
+  .journey-card__content {
+    padding: 1.5em 2em 2em;
+    margin-top: -5em;
     position: relative;
-    margin-bottom: 3em;
+    z-index: 1;
   }
 
-  .journey-timeline__year-group:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Year marker */
-  .journey-timeline__year-marker {
-    position: absolute;
-    left: -120px;
-    top: 0;
-    width: 100px;
+  .journey-card__meta {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 12px;
+    gap: 1.5em;
+    margin-bottom: 0.75em;
+    font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.5);
   }
 
-  .journey-timeline__year {
-    font-family:
-      Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond,
-      'Times New Roman', serif;
+  .journey-card__title {
+    font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
     font-size: 1.75em;
     font-weight: 400;
-    color: #5f646c;
-    line-height: 1;
+    color: #fff;
+    margin: 0 0 0.25em;
+    line-height: 1.2;
+    transition: color 0.3s ease;
   }
 
-  .journey-timeline__year-dot {
-    width: 12px;
-    height: 12px;
-    background: #c75050;
-    border-radius: 50%;
-    border: 3px solid #f8f9fa;
-    box-shadow: 0 0 0 2px #c75050;
-    position: relative;
-    right: -7px;
+  .journey-card:hover .journey-card__title {
+    color: #47dbb4;
   }
 
-  /* Cards container */
-  .journey-timeline__cards {
-    display: flex;
-    flex-direction: column;
-    gap: 2em;
-    padding-left: 2em;
+  .journey-card__subtitle {
+    font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
+    font-size: 1.05em;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 1em;
+    line-height: 1.4;
   }
 
-  /* Card wrapper with connector */
-  .journey-timeline__card-wrapper {
-    position: relative;
-    opacity: 0;
-    transform: translateX(20px);
-    transition:
-      opacity 0.6s ease,
-      transform 0.6s ease;
+  .journey-card__countries {
+    font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.8em;
+    color: #c75050;
+    letter-spacing: 0.5px;
   }
 
-  .journey-timeline__card-wrapper--visible {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  /* Connector line from spine to card */
-  .journey-timeline__connector {
-    position: absolute;
-    left: -2em;
-    top: 50%;
-    width: 2em;
-    height: 2px;
-    background: #c75050;
-    opacity: 0.4;
-  }
-
-  .journey-timeline__connector::before {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    background: #c75050;
-    border-radius: 50%;
-  }
-
-  /* Empty state */
-  .journey-timeline__empty {
-    text-align: center;
-    font-size: 1.1em;
-    color: #9d9c95;
-    font-family:
-      'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    padding: 3em 0;
-  }
-
-  /* Mobile responsive */
+  /* Mobile adjustments */
   @media (max-width: 720px) {
-    .journey-timeline {
+    .journey-timeline__years {
+      gap: 1.25em;
+      padding: 1em 1.5em;
+      overflow-x: auto;
+      justify-content: flex-start;
+      scrollbar-width: none;
+    }
+
+    .journey-timeline__years::-webkit-scrollbar {
+      display: none;
+    }
+
+    .journey-timeline__year-btn {
+      font-size: 1em;
+      flex-shrink: 0;
+    }
+
+    .journey-timeline__content {
       padding: 2em 1em;
     }
 
-    .journey-timeline__container {
-      padding-left: 0;
+    .journey-timeline__year-title {
+      font-size: 2.25em;
+      margin-bottom: 0.75em;
     }
 
-    /* Hide spine on mobile */
-    .journey-timeline__spine {
-      display: none;
-    }
-
-    /* Year marker becomes inline header */
-    .journey-timeline__year-group {
-      margin-bottom: 2em;
-    }
-
-    .journey-timeline__year-marker {
-      position: relative;
-      left: 0;
-      width: auto;
-      justify-content: flex-start;
-      margin-bottom: 1em;
-      padding-bottom: 0.75em;
-      border-bottom: 2px solid #c75050;
-    }
-
-    .journey-timeline__year {
-      font-size: 1.5em;
-    }
-
-    .journey-timeline__year-dot {
-      display: none;
+    .journey-timeline__year-section {
+      margin-bottom: 3em;
     }
 
     .journey-timeline__cards {
-      padding-left: 0;
-      gap: 1.5em;
+      gap: 2em;
     }
 
-    .journey-timeline__connector {
-      display: none;
+    .journey-card__content {
+      padding: 1.25em 1.5em 1.5em;
+      margin-top: -4em;
     }
 
-    .journey-timeline__card-wrapper {
-      opacity: 1;
-      transform: translateX(0);
+    .journey-card__title {
+      font-size: 1.4em;
+    }
+
+    .journey-card__subtitle {
+      font-size: 0.95em;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .journey-card,
+    .journey-card__image {
+      transition: none;
     }
   }
 </style>

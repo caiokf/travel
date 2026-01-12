@@ -27,23 +27,17 @@
 
   // Calculate stats from trips
   const stats = computed(() => {
-    const completedTrips = props.trips.filter((t) => t.status === 'completed')
     const countries = new Set<string>()
-    let totalCities = 0
 
-    completedTrips.forEach((trip) => {
+    props.trips.forEach((trip) => {
       if (trip.countries) {
         trip.countries.forEach((c) => countries.add(c))
-      }
-      if (trip.cities) {
-        totalCities += trip.cities
       }
     })
 
     return {
-      journeys: completedTrips.length,
+      journeys: props.trips.length,
       countries: countries.size,
-      cities: totalCities,
     }
   })
 
@@ -81,6 +75,13 @@
 
 <template>
   <header class="globe-hero" :class="{ 'globe-hero--loaded': isLoaded }">
+    <!-- Aurora background -->
+    <div class="globe-hero__aurora">
+      <div class="globe-hero__aurora-layer globe-hero__aurora-layer--1"></div>
+      <div class="globe-hero__aurora-layer globe-hero__aurora-layer--2"></div>
+      <div class="globe-hero__aurora-layer globe-hero__aurora-layer--3"></div>
+    </div>
+
     <div class="globe-hero__canvas-container">
       <canvas ref="canvasRef" class="globe-hero__canvas"></canvas>
       <div class="globe-hero__gradient-overlay"></div>
@@ -107,11 +108,6 @@
         <div class="globe-hero__stat">
           <span class="globe-hero__stat-value">{{ stats.countries }}</span>
           <span class="globe-hero__stat-label">Countries</span>
-        </div>
-        <div class="globe-hero__stat-divider"></div>
-        <div class="globe-hero__stat">
-          <span class="globe-hero__stat-value">{{ stats.cities }}</span>
-          <span class="globe-hero__stat-label">Cities</span>
         </div>
       </div>
 
@@ -145,6 +141,101 @@
     background: #181922;
   }
 
+  /* Aurora effect */
+  .globe-hero__aurora {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    opacity: 1;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .globe-hero__aurora-layer {
+    position: absolute;
+    width: 200%;
+    height: 100%;
+    left: -50%;
+    filter: blur(80px);
+  }
+
+  .globe-hero__aurora-layer--1 {
+    top: -20%;
+    background: radial-gradient(
+      ellipse 100% 60% at 25% 30%,
+      rgba(71, 219, 180, 0.5) 0%,
+      rgba(71, 219, 180, 0.2) 40%,
+      transparent 70%
+    );
+    animation: aurora-drift-1 25s ease-in-out infinite;
+  }
+
+  .globe-hero__aurora-layer--2 {
+    top: -10%;
+    background: radial-gradient(
+      ellipse 80% 50% at 75% 40%,
+      rgba(139, 92, 246, 0.45) 0%,
+      rgba(139, 92, 246, 0.15) 45%,
+      transparent 65%
+    );
+    animation: aurora-drift-2 30s ease-in-out infinite;
+  }
+
+  .globe-hero__aurora-layer--3 {
+    top: -30%;
+    background: radial-gradient(
+      ellipse 90% 55% at 50% 35%,
+      rgba(56, 189, 248, 0.4) 0%,
+      rgba(56, 189, 248, 0.15) 40%,
+      transparent 60%
+    );
+    animation: aurora-drift-3 20s ease-in-out infinite;
+  }
+
+  @keyframes aurora-drift-1 {
+    0%, 100% {
+      transform: translateX(0) translateY(0) scale(1);
+      opacity: 0.7;
+    }
+    33% {
+      transform: translateX(10%) translateY(5%) scale(1.1);
+      opacity: 0.5;
+    }
+    66% {
+      transform: translateX(-5%) translateY(-3%) scale(0.95);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes aurora-drift-2 {
+    0%, 100% {
+      transform: translateX(0) translateY(0) scale(1);
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateX(-15%) translateY(8%) scale(1.15);
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes aurora-drift-3 {
+    0%, 100% {
+      transform: translateX(0) translateY(0) scale(1);
+      opacity: 0.5;
+    }
+    25% {
+      transform: translateX(8%) translateY(-5%) scale(1.05);
+      opacity: 0.7;
+    }
+    75% {
+      transform: translateX(-10%) translateY(3%) scale(0.9);
+      opacity: 0.4;
+    }
+  }
+
   .globe-hero__canvas-container {
     position: absolute;
     top: 0;
@@ -175,23 +266,16 @@
     background:
       radial-gradient(
         ellipse at center,
-        transparent 20%,
-        rgba(24, 25, 34, 0.4) 60%,
-        rgba(24, 25, 34, 0.9) 100%
-      ),
-      linear-gradient(
-        to bottom,
-        rgba(24, 25, 34, 0.3) 0%,
         transparent 30%,
-        transparent 70%,
-        rgba(24, 25, 34, 0.8) 100%
+        rgba(24, 25, 34, 0.3) 70%,
+        rgba(24, 25, 34, 0.6) 100%
       );
     pointer-events: none;
   }
 
   .globe-hero__content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     text-align: center;
     color: #fff;
     padding: 2em;
@@ -390,6 +474,15 @@
 
     .globe-hero__stat-divider {
       height: 30px;
+    }
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .globe-hero__aurora-layer,
+    .globe-hero__scroll-hint,
+    .globe-hero__scroll-icon {
+      animation: none;
     }
   }
 </style>

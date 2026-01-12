@@ -42,6 +42,7 @@ useJourneyMap({
   countries,
   scrollProgress,
   canvasRef,
+  slug,
   mapZoom,
   mapCenter,
   routeType,
