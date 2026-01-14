@@ -1,0 +1,10 @@
+{
+  "routeType": "driving",
+  "generatedAt": "2026-01-15T00:00:00.000Z",
+  "waypointCount": 3,
+  "coordinates": [
+    [30.0458, 69.7271],
+    [29.8500, 69.4500],
+    [30.7500, 69.7833]
+  ]
+}

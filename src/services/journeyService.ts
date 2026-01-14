@@ -13,25 +13,17 @@ const journeyCache = new Map<string, Journey>()
 const storyCache = new Map<string, JourneyStory>()
 let journeyListCache: Journey[] | null = null
 
-// All journey slugs - each journey is in /journeys/[slug]/ folder
-const JOURNEY_SLUGS: string[] = [
-  'croatia-paklenica-climbing',
-  'bike-zagreb-to-cluj',
-  'uruguay-adventure',
-  'switzerland-winter-2014',
-  'switzerland-to-cappadocia',
-  'cappadocia-to-marmaris-2015',
-  'first-cappadocia',
-  'st-petersburg-to-kirkenes',
-  'ukraine-skiing-carpathians',
-  'winter-hitchhiking-scandinavia',
-  'lisbon-to-moscow',
-  'kazakhstan-to-bishkek',
-  'kyrgyzstan-tajikistan-pamir-highway',
-  'iran-discovery-2017',
-  'dubai-stopover',
-  'sri-lanka-exploration',
-]
+// Dynamically discover all journey folders at build time using Vite's glob import
+const journeyModules = import.meta.glob('/public/journeys/*/journey.md', {
+  query: '?raw',
+  import: 'default',
+})
+
+// Extract slugs from the discovered paths (excluding WIP folders)
+const JOURNEY_SLUGS: string[] = Object.keys(journeyModules).map((path) => {
+  const match = path.match(/\/public\/journeys\/([^/]+)\/journey\.md$/)
+  return match ? match[1] : ''
+}).filter((slug) => slug && !slug.startsWith('wip-'))
 
 /**
  * Parse YAML frontmatter from markdown content
@@ -77,6 +69,11 @@ function formatDateRange(dateStart: string, dateEnd?: string): string {
     'Dec',
   ]
 
+  // Handle invalid dates
+  if (isNaN(start.getTime())) {
+    return ''
+  }
+
   const startStr = `${months[start.getMonth()]} ${start.getDate()}`
 
   if (!dateEnd) {
@@ -84,6 +81,10 @@ function formatDateRange(dateStart: string, dateEnd?: string): string {
   }
 
   const end = new Date(dateEnd)
+  if (isNaN(end.getTime())) {
+    return `${startStr}, ${start.getFullYear()}`
+  }
+
   const endStr = `${months[end.getMonth()]} ${end.getDate()}`
 
   if (start.getFullYear() === end.getFullYear()) {
@@ -203,8 +204,8 @@ function frontmatterToJourney(
     mapCenter,
     routeType,
     coordinates,
-    year: startDate.getFullYear(),
-    month: startDate.getMonth() + 1,
+    year: isNaN(startDate.getTime()) ? 2000 : startDate.getFullYear(),
+    month: isNaN(startDate.getTime()) ? 1 : startDate.getMonth() + 1,
     dateRange: formatDateRange(dateStart, dateEnd),
   }
 }
@@ -364,18 +365,18 @@ export async function loadJourney(slug: string): Promise<Journey | null> {
     return journeyCache.get(slug)!
   }
 
-  if (!JOURNEY_SLUGS.includes(slug)) {
+  const modulePath = `/public/journeys/${slug}/journey.md`
+  const loader = journeyModules[modulePath]
+
+  if (!loader) {
     console.error(`Journey not found: ${slug}`)
     return null
   }
 
   try {
-    const response = await fetch(`/journeys/${slug}/journey.md`)
-    if (!response.ok) {
-      throw new Error(`Failed to fetch journey: ${response.status}`)
-    }
+    // Load the raw markdown content via Vite's glob import
+    const content = (await loader()) as string
 
-    const content = await response.text()
     const { frontmatter, body } = parseFrontmatter(content)
     const journey = frontmatterToJourney(frontmatter, slug)
 

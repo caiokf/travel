@@ -140,20 +140,20 @@
                 />
                 <div class="journey-card__placeholder" v-else></div>
                 <div class="journey-card__gradient"></div>
-              </div>
 
-              <div class="journey-card__content">
-                <div class="journey-card__meta">
-                  <span class="journey-card__date">{{ trip.dateRange }}</span>
-                  <span v-if="trip.duration" class="journey-card__duration">{{ trip.duration }}</span>
-                </div>
+                <div class="journey-card__content">
+                  <div class="journey-card__meta">
+                    <span class="journey-card__date">{{ trip.dateRange }}</span>
+                    <span v-if="trip.duration" class="journey-card__duration">{{ trip.duration }}</span>
+                  </div>
 
-                <h3 class="journey-card__title">{{ trip.title }}</h3>
+                  <h3 class="journey-card__title">{{ trip.title }}</h3>
 
-                <p class="journey-card__subtitle">{{ trip.subtitle }}</p>
+                  <p class="journey-card__subtitle">{{ trip.subtitle }}</p>
 
-                <div v-if="trip.countries?.length" class="journey-card__countries">
-                  {{ trip.countries.join(' → ') }}
+                  <div v-if="trip.countries?.length" class="journey-card__countries">
+                    {{ trip.countries.join(' → ') }}
+                  </div>
                 </div>
               </div>
             </router-link>
@@ -254,7 +254,7 @@
   .journey-card {
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(139, 115, 85, 0.08);
+    background: transparent;
     transition: transform 0.4s ease, box-shadow 0.4s ease;
   }
 
@@ -271,7 +271,7 @@
 
   .journey-card__image-container {
     position: relative;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
   }
 
@@ -302,17 +302,19 @@
     inset: 0;
     background: linear-gradient(
       to top,
-      rgba(248, 246, 243, 1) 0%,
-      rgba(248, 246, 243, 0.4) 30%,
+      rgba(45, 38, 30, 0.85) 0%,
+      rgba(45, 38, 30, 0.5) 40%,
       transparent 100%
     );
   }
 
   .journey-card__content {
-    padding: 1.5em 2em 2em;
-    margin-top: -5em;
-    position: relative;
-    z-index: 1;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5em 2em 1.75em;
+    z-index: 2;
   }
 
   .journey-card__meta {
@@ -323,36 +325,36 @@
     font-size: 0.75em;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: #6b5d4d;
+    color: rgba(255, 255, 255, 0.7);
   }
 
   .journey-card__title {
     font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
     font-size: 1.75em;
     font-weight: 400;
-    color: #2d261e;
+    color: #fff;
     margin: 0 0 0.25em;
     line-height: 1.2;
     transition: color 0.3s ease;
   }
 
   .journey-card:hover .journey-card__title {
-    color: #5c4d3d;
+    color: rgba(255, 255, 255, 0.9);
   }
 
   .journey-card__subtitle {
     font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
     font-size: 1.05em;
     font-style: italic;
-    color: #5c4d3d;
-    margin: 0 0 1em;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0 0 0.75em;
     line-height: 1.4;
   }
 
   .journey-card__countries {
     font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 0.8em;
-    color: #8b7355;
+    color: rgba(255, 255, 255, 0.6);
     letter-spacing: 0.5px;
   }
 
@@ -394,7 +396,6 @@
 
     .journey-card__content {
       padding: 1.25em 1.5em 1.5em;
-      margin-top: -4em;
     }
 
     .journey-card__title {

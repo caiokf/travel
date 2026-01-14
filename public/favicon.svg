@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Backpack body -->
+  <rect x="6" y="10" width="20" height="18" rx="3" fill="#8b7355"/>
+  <!-- Top flap -->
+  <path d="M6 13 Q6 8 16 8 Q26 8 26 13" fill="#6b5d4d"/>
+  <!-- Straps hint at top -->
+  <rect x="9" y="6" width="3" height="4" rx="1" fill="#5c4d3d"/>
+  <rect x="20" y="6" width="3" height="4" rx="1" fill="#5c4d3d"/>
+  <!-- Front pocket -->
+  <rect x="10" y="16" width="12" height="8" rx="2" fill="#6b5d4d"/>
+  <!-- Pocket flap -->
+  <rect x="10" y="15" width="12" height="3" rx="1" fill="#5c4d3d"/>
+  <!-- Buckle -->
+  <rect x="14" y="17" width="4" height="2" rx="0.5" fill="#d4c4a8"/>
+</svg>
