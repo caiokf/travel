@@ -18,11 +18,21 @@ interface JourneyMapOptions {
   routeType?: Ref<'driving' | 'walking' | 'cycling' | 'straight' | undefined>
 }
 
+export interface WaypointScreenPosition {
+  id: string
+  x: number  // screen x position
+  y: number  // screen y position
+  isVisible: boolean
+}
+
 export function useJourneyMap(options: JourneyMapOptions) {
   const { waypoints, countries, scrollProgress, canvasRef, slug, mapZoom, mapCenter, routeType } = options
 
   const isLoaded = ref(false)
   const cameraPosition = ref({ x: 0, y: 0 })
+
+  // Screen positions of waypoint markers (updated each render)
+  const waypointScreenPositions = ref<WaypointScreenPosition[]>([])
 
   let geoData: FeatureCollection | null = null
   let projection: d3.GeoProjection | null = null
@@ -440,6 +450,197 @@ export function useJourneyMap(options: JourneyMapOptions) {
     drawCurrentPosition(ctx, routeProg, zoom)
 
     ctx.restore()
+
+    // Draw image connectors (cones from images to waypoints)
+    drawImageConnectors(ctx, zoom, offsetX, offsetY)
+
+    // Calculate and store screen positions of waypoints for external use
+    updateWaypointScreenPositions(zoom, offsetX, offsetY, viewportWidth, viewportHeight)
+  }
+
+  // Draw cone connectors from images to their waypoints
+  const drawImageConnectors = (
+    ctx: CanvasRenderingContext2D,
+    zoom: number,
+    offsetX: number,
+    offsetY: number
+  ) => {
+    // Find all images within waypoint sections
+    const sections = document.querySelectorAll('[data-waypoint-id]')
+
+    sections.forEach((section) => {
+      const waypointId = section.getAttribute('data-waypoint-id')
+      if (!waypointId) return
+
+      // Find the waypoint's screen position
+      const wpIndex = projectedWaypoints.findIndex(wp => wp.id === waypointId)
+      if (wpIndex < 0) return
+
+      const wp = projectedWaypoints[wpIndex]
+      const waypointScreenX = wp.x * zoom - offsetX
+      const waypointScreenY = wp.y * zoom - offsetY
+
+      // Find all images in this section
+      const images = section.querySelectorAll('.story-image img')
+
+      images.forEach((img) => {
+        const rect = img.getBoundingClientRect()
+
+        // Calculate image visibility based on distance from viewport center
+        const halfWindowHeight = window.innerHeight / 2
+        const falloff = halfWindowHeight * 1.2
+        const imageMiddle = rect.top + rect.height / 2
+        let imageVisibility = (falloff - Math.abs(halfWindowHeight - imageMiddle)) / falloff
+
+        // Apply easing (quadratic out)
+        imageVisibility = Math.max(0, Math.min(1, imageVisibility))
+        imageVisibility = imageVisibility * (2 - imageVisibility) // quad out easing
+
+        if (imageVisibility <= 0) return
+
+        // Origin point (waypoint on map)
+        const origin = { x: waypointScreenX, y: waypointScreenY }
+
+        // Determine which corners to use based on image position relative to waypoint
+        // If image is above waypoint, use bottom corners; if below, use top corners
+        // If image is to the left of waypoint, use right corners
+        let corner1: [number, number]
+        let corner2: [number, number]
+
+        if (rect.top < origin.y) {
+          // Image is above the waypoint
+          corner1 = [rect.right, rect.bottom]
+          corner2 = [rect.left, rect.bottom]
+        } else {
+          // Image is below or at the waypoint
+          corner1 = [rect.right, rect.top]
+          corner2 = [rect.left, rect.top]
+        }
+
+        // If waypoint is to the left of image, swap corners
+        if (origin.x < rect.left) {
+          corner1 = [rect.left, rect.top < origin.y ? rect.bottom : rect.top]
+          corner2 = [rect.left, rect.top < origin.y ? rect.top : rect.bottom]
+        } else if (origin.x > rect.right) {
+          corner1 = [rect.right, rect.top < origin.y ? rect.bottom : rect.top]
+          corner2 = [rect.right, rect.top < origin.y ? rect.top : rect.bottom]
+        }
+
+        // Draw the cone/triangle
+        drawImageCone(ctx, origin, corner1, corner2, imageVisibility)
+      })
+    })
+  }
+
+  // Draw a cone/triangle from origin (waypoint) to image corners
+  const drawImageCone = (
+    ctx: CanvasRenderingContext2D,
+    origin: { x: number; y: number },
+    corner1: [number, number],
+    corner2: [number, number],
+    visibility: number
+  ) => {
+    const PI = Math.PI
+    const PI2 = PI * 2
+
+    // Calculate angles from origin to corners
+    const getAngle = (x: number, y: number) => Math.atan2(y - origin.y, x - origin.x)
+    const angle1 = getAngle(corner1[0], corner1[1]) + PI2
+    const angle2 = getAngle(corner2[0], corner2[1]) + PI2
+
+    // Calculate the angle difference and middle angle
+    const angleDelta = Math.atan2(
+      Math.sin(angle1 - angle2),
+      Math.cos(angle1 - angle2)
+    )
+    const angleMiddle = angle1 - angleDelta / 2
+
+    // Radius for the arc at the origin
+    const radius = 2 * visibility
+
+    // Calculate offset for the origin point (to create rounded end)
+    const angleOrigin = angleMiddle + PI / 2
+    const originOffset = {
+      x: (radius + 1) * Math.cos(angleOrigin),
+      y: (radius + 1) * Math.sin(angleOrigin),
+    }
+
+    // Draw the filled cone with semi-transparency
+    ctx.save()
+
+    // Use darken blend mode if supported, otherwise just use transparency
+    const prevComposite = ctx.globalCompositeOperation
+    ctx.globalCompositeOperation = 'darken'
+    if (ctx.globalCompositeOperation !== 'darken') {
+      ctx.globalCompositeOperation = 'source-over'
+    }
+
+    // Create gradient from waypoint (lighter) to image corners (darker)
+    const cornerMidX = (corner1[0] + corner2[0]) / 2
+    const cornerMidY = (corner1[1] + corner2[1]) / 2
+    const gradient = ctx.createLinearGradient(origin.x, origin.y, cornerMidX, cornerMidY)
+
+    const alphaAtOrigin = visibility * 0.3
+    const alphaAtCorners = visibility * 0.9
+    gradient.addColorStop(0, `rgba(180, 180, 160, ${alphaAtOrigin})`)
+    gradient.addColorStop(1, `rgba(160, 160, 140, ${alphaAtCorners})`)
+
+    ctx.fillStyle = gradient
+
+    // Draw the cone shape
+    ctx.beginPath()
+    ctx.moveTo(origin.x + originOffset.x, origin.y + originOffset.y)
+    ctx.lineTo(corner1[0], corner1[1])
+    ctx.lineTo(corner2[0], corner2[1])
+    ctx.lineTo(origin.x - originOffset.x, origin.y - originOffset.y)
+
+    // Add arc at the origin for rounded appearance
+    ctx.arc(origin.x, origin.y, radius, angleOrigin + PI, angleOrigin)
+    ctx.fill()
+
+    // Draw the small circle at the origin
+    ctx.beginPath()
+    ctx.arc(origin.x, origin.y, radius, angleOrigin, angleOrigin + PI2)
+    ctx.fill()
+
+    ctx.globalCompositeOperation = prevComposite
+
+    // Draw a small filled circle at the waypoint point
+    ctx.fillStyle = '#405b54'
+    const imagePointRadius = 4 * visibility
+    ctx.beginPath()
+    ctx.arc(origin.x, origin.y, imagePointRadius, 0, PI2)
+    ctx.fill()
+
+    ctx.restore()
+  }
+
+  // Calculate the screen position of each waypoint marker
+  const updateWaypointScreenPositions = (
+    zoom: number,
+    offsetX: number,
+    offsetY: number,
+    viewportWidth: number,
+    viewportHeight: number
+  ) => {
+    const positions: WaypointScreenPosition[] = projectedWaypoints.map((wp) => {
+      // Transform from projected coordinates to screen coordinates
+      const screenX = wp.x * zoom - offsetX
+      const screenY = wp.y * zoom - offsetY
+
+      // Check if visible on screen
+      const isVisible = screenX >= -50 && screenX <= viewportWidth + 50 &&
+                        screenY >= -50 && screenY <= viewportHeight + 50
+
+      return {
+        id: wp.id,
+        x: screenX,
+        y: screenY,
+        isVisible,
+      }
+    })
+
+    waypointScreenPositions.value = positions
   }
 
   const drawTrail = (
@@ -610,6 +811,7 @@ export function useJourneyMap(options: JourneyMapOptions) {
   return {
     isLoaded,
     cameraPosition,
+    waypointScreenPositions,
     render,
   }
 }

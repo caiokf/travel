@@ -121,6 +121,8 @@ I stay three nights. Evenings pass by headlamp, reading my Kindle, eating discou
 
 One afternoon I bump into tourists I'd guided on a dog sledding tour days earlier, back when I was working in Kirkenes. They're on a coastal cruise now, seeing the Arctic from the comfortable side. We laugh at the improbability. The world up here is very small.
 
+![vardo](/journeys/winter-hitchhiking-scandinavia/img-vardo.png)
+
 ---
 
 <!-- waypoint: honningsvag -->

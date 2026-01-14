@@ -19,7 +19,7 @@
     <template v-for="(block, index) in section.blocks" :key="index">
       <p v-if="block.type === 'paragraph'">{{ block.content }}</p>
 
-      <figure v-else-if="block.type === 'image'">
+      <figure v-else-if="block.type === 'image'" class="story-image">
         <img :src="block.src" :alt="block.caption || ''" />
         <figcaption v-if="block.caption">{{ block.caption }}</figcaption>
       </figure>
@@ -89,16 +89,16 @@
     line-height: 1.5;
   }
 
-  .story-section figure {
+  .story-image {
     margin: 1em 0 2em;
   }
 
-  .story-section figure img {
+  .story-image img {
     max-width: 100%;
     display: block;
   }
 
-  .story-section figcaption {
+  .story-image figcaption {
     font-style: italic;
     font-size: 0.85em;
     text-align: center;

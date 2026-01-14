@@ -172,6 +172,7 @@ function goBack() {
 <style scoped>
 .journey-view {
   position: relative;
+  overflow-x: clip; /* Clip horizontal overflow but allow images to extend visually */
 }
 
 .journey-view__loading,
@@ -264,6 +265,8 @@ function goBack() {
   position: relative;
   padding: 5em 3em;
   z-index: 1000;
+  /* Allow images to break out of container */
+  overflow: visible;
   /* Subtle gradient fade to let map show through on the right */
   background: linear-gradient(
     to right,
