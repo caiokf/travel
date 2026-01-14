@@ -78,8 +78,8 @@
     position: relative;
     z-index: 1000;
     padding: 4em 2em;
-    background: #181922;
-    color: #fff;
+    background: #f8f6f3;
+    border-top: 1px solid rgba(139, 115, 85, 0.1);
   }
 
   .home-page__footer-text {
@@ -89,7 +89,7 @@
       'Times New Roman', serif;
     max-width: 800px;
     margin: 0 auto;
-    color: #d1d2d2;
+    color: #8b7355;
   }
 
   @media (max-width: 720px) {

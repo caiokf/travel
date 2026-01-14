@@ -5,8 +5,8 @@ import { loadJourney, loadJourneyStory } from '../services/journeyService'
 import { useJourneyScrollProgress } from '../composables/useJourneyScrollProgress'
 import { useJourneyMap } from '../composables/useJourneyMap'
 import type { Journey, JourneyStory } from '../types'
-import HeroHeader from '../components/HeroHeader.vue'
-import StorySection from '../components/StorySection.vue'
+import HeroHeader from '../components/journey/HeroHeader.vue'
+import StorySection from '../components/journey/StorySection.vue'
 
 const route = useRoute()
 const router = useRouter()

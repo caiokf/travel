@@ -37,6 +37,9 @@ export function useJourneyMap(options: JourneyMapOptions) {
   let cumulativeDistances: number[] = []
   let totalPathLength: number = 0
 
+  // Where each waypoint falls along the route (0-1, as percentage of route distance)
+  let waypointRoutePositions: number[] = []
+
   // Helper to recalculate path distances
   const recalculateDistances = () => {
     cumulativeDistances = [0]
@@ -47,6 +50,59 @@ export function useJourneyMap(options: JourneyMapOptions) {
       cumulativeDistances.push(cumulativeDistances[i - 1] + segmentLength)
     }
     totalPathLength = cumulativeDistances[cumulativeDistances.length - 1] || 1
+
+    // Calculate where each waypoint falls along the route path
+    waypointRoutePositions = projectedWaypoints.map((wp) => {
+      // Find the closest point on the path to this waypoint
+      let minDist = Infinity
+      let closestIndex = 0
+
+      for (let i = 0; i < projectedPath.length; i++) {
+        const dx = projectedPath[i][0] - wp.x
+        const dy = projectedPath[i][1] - wp.y
+        const dist = dx * dx + dy * dy
+        if (dist < minDist) {
+          minDist = dist
+          closestIndex = i
+        }
+      }
+
+      // Return the position as a fraction of total path length
+      return cumulativeDistances[closestIndex] / totalPathLength
+    })
+  }
+
+  // Convert scroll progress (DOM-based) to route progress (path-distance-based)
+  // This ensures that when scrollProgress = waypoint.pathPosition, the trail reaches that waypoint
+  const scrollToRouteProgress = (scrollProg: number): number => {
+    const wps = waypoints.value
+    if (wps.length < 2 || waypointRoutePositions.length < 2) return scrollProg
+
+    // Find which waypoint segment we're in based on scroll progress
+    let prevWpIndex = 0
+    for (let i = wps.length - 1; i >= 0; i--) {
+      if (scrollProg >= wps[i].pathPosition) {
+        prevWpIndex = i
+        break
+      }
+    }
+
+    const nextWpIndex = Math.min(prevWpIndex + 1, wps.length - 1)
+
+    // Get the scroll positions (DOM-based) for prev and next waypoints
+    const prevScrollPos = wps[prevWpIndex].pathPosition
+    const nextScrollPos = wps[nextWpIndex].pathPosition
+
+    // Get the route positions for prev and next waypoints
+    const prevRoutePos = waypointRoutePositions[prevWpIndex] ?? 0
+    const nextRoutePos = waypointRoutePositions[nextWpIndex] ?? 1
+
+    // Interpolate within the segment
+    const scrollSegmentLength = nextScrollPos - prevScrollPos
+    if (scrollSegmentLength <= 0) return prevRoutePos
+
+    const t = (scrollProg - prevScrollPos) / scrollSegmentLength
+    return prevRoutePos + t * (nextRoutePos - prevRoutePos)
   }
 
   // Load world map data (uses cache from preload)
@@ -271,26 +327,42 @@ export function useJourneyMap(options: JourneyMapOptions) {
   }
 
   // Get smooth camera position using Catmull-Rom spline through waypoints
-  const getCameraPosition = (progress: number): { x: number; y: number } => {
+  // Uses scroll progress (DOM-based) to determine camera position between waypoints
+  const getCameraPosition = (scrollProg: number): { x: number; y: number } => {
     if (projectedWaypoints.length < 2) return { x: 0, y: 0 }
 
+    const wps = waypoints.value
     const points = projectedWaypoints
-    const totalSegments = points.length - 1
-    const segmentProgress = progress * totalSegments
-    const segmentIndex = Math.min(
-      Math.floor(segmentProgress),
-      totalSegments - 1
-    )
-    const t = segmentProgress - segmentIndex
 
-    // Apply smoothstep easing to t for even smoother transitions
+    // Find which waypoint segment we're in based on scroll progress
+    let prevWpIndex = 0
+    for (let i = wps.length - 1; i >= 0; i--) {
+      if (scrollProg >= wps[i].pathPosition) {
+        prevWpIndex = i
+        break
+      }
+    }
+
+    const nextWpIndex = Math.min(prevWpIndex + 1, wps.length - 1)
+
+    // Calculate interpolation factor within this segment
+    const prevScrollPos = wps[prevWpIndex]?.pathPosition ?? 0
+    const nextScrollPos = wps[nextWpIndex]?.pathPosition ?? 1
+    const scrollSegmentLength = nextScrollPos - prevScrollPos
+
+    let t = 0
+    if (scrollSegmentLength > 0) {
+      t = (scrollProg - prevScrollPos) / scrollSegmentLength
+    }
+
+    // Apply smoothstep easing to t for smoother transitions
     const easedT = t * t * (3 - 2 * t)
 
     // Get the 4 control points for Catmull-Rom (with clamping at edges)
-    const p0 = points[Math.max(0, segmentIndex - 1)]
-    const p1 = points[segmentIndex]
-    const p2 = points[Math.min(points.length - 1, segmentIndex + 1)]
-    const p3 = points[Math.min(points.length - 1, segmentIndex + 2)]
+    const p0 = points[Math.max(0, prevWpIndex - 1)]
+    const p1 = points[prevWpIndex]
+    const p2 = points[nextWpIndex]
+    const p3 = points[Math.min(points.length - 1, nextWpIndex + 1)]
 
     return catmullRom(p0, p1, p2, p3, easedT)
   }
@@ -303,11 +375,12 @@ export function useJourneyMap(options: JourneyMapOptions) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const progress = scrollProgress.value
+    const scrollProg = scrollProgress.value
+    const routeProg = scrollToRouteProgress(scrollProg)
     const journeyCountries = countries.value
 
     // Use smooth camera position (waypoint-based) for map panning
-    const camPos = getCameraPosition(progress)
+    const camPos = getCameraPosition(scrollProg)
     cameraPosition.value = camPos
 
     const viewportWidth = canvas.width
@@ -315,7 +388,7 @@ export function useJourneyMap(options: JourneyMapOptions) {
 
     // Dynamic zoom and pan based on progress
     const baseZoom = 1.2
-    const zoomProgress = Math.sin(progress * Math.PI)
+    const zoomProgress = Math.sin(scrollProg * Math.PI)
     const zoom = baseZoom + zoomProgress * 0.4
 
     // Calculate viewport offset - shift map to the right
@@ -357,14 +430,14 @@ export function useJourneyMap(options: JourneyMapOptions) {
       ctx.stroke(path)
     })
 
-    // Draw the journey trail
-    drawTrail(ctx, progress, zoom)
+    // Draw the journey trail (uses route progress for accurate path drawing)
+    drawTrail(ctx, routeProg, zoom)
 
-    // Draw waypoint markers
-    drawWaypoints(ctx, progress, zoom)
+    // Draw waypoint markers (uses scroll progress to match DOM positions)
+    drawWaypoints(ctx, scrollProg, zoom)
 
-    // Draw current position marker
-    drawCurrentPosition(ctx, progress, zoom)
+    // Draw current position marker (uses route progress)
+    drawCurrentPosition(ctx, routeProg, zoom)
 
     ctx.restore()
   }
@@ -423,13 +496,16 @@ export function useJourneyMap(options: JourneyMapOptions) {
 
   const drawWaypoints = (
     ctx: CanvasRenderingContext2D,
-    progress: number,
+    scrollProg: number,
     zoom: number
   ) => {
+    const wps = waypoints.value
+
     projectedWaypoints.forEach((wp, index) => {
-      const waypointProgress = index / (projectedWaypoints.length - 1 || 1)
-      const isActive = progress >= waypointProgress
-      const isUpcoming = progress >= waypointProgress - 0.05
+      // Use the waypoint's pathPosition (DOM-based) to determine if active
+      const waypointPathPos = wps[index]?.pathPosition ?? (index / (projectedWaypoints.length - 1 || 1))
+      const isActive = scrollProg >= waypointPathPos
+      const isUpcoming = scrollProg >= waypointPathPos - 0.05
 
       ctx.save()
 

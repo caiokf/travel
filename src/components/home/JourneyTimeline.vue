@@ -168,13 +168,7 @@
   .journey-timeline {
     position: relative;
     padding: 0 0 6em;
-    background: linear-gradient(
-      to bottom,
-      #181922 0%,
-      #1e2530 10%,
-      #252d3a 30%,
-      #2d3748 100%
-    );
+    background: #f8f6f3;
     min-height: 100vh;
   }
 
@@ -187,10 +181,10 @@
     justify-content: center;
     gap: 2em;
     padding: 1.5em 2em;
-    background: rgba(24, 25, 34, 0.9);
+    background: rgba(248, 246, 243, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(139, 115, 85, 0.1);
   }
 
   .journey-timeline__year-btn {
@@ -198,7 +192,7 @@
     border: none;
     font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
     font-size: 1.1em;
-    color: rgba(255, 255, 255, 0.4);
+    color: #8b7355;
     cursor: pointer;
     padding: 0.5em 0;
     position: relative;
@@ -206,11 +200,11 @@
   }
 
   .journey-timeline__year-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
+    color: #5c4d3d;
   }
 
   .journey-timeline__year-btn--active {
-    color: #fff;
+    color: #2d261e;
   }
 
   .journey-timeline__year-btn--active::after {
@@ -221,7 +215,7 @@
     transform: translateX(-50%);
     width: 20px;
     height: 2px;
-    background: #c75050;
+    background: #8b7355;
   }
 
   /* Content area */
@@ -244,7 +238,7 @@
     font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
     font-size: 3em;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.15);
+    color: rgba(92, 77, 61, 0.3);
     margin: 0 0 1em;
     padding-left: 0.25em;
   }
@@ -260,13 +254,13 @@
   .journey-card {
     border-radius: 12px;
     overflow: hidden;
-    background: #181922;
+    background: rgba(139, 115, 85, 0.08);
     transition: transform 0.4s ease, box-shadow 0.4s ease;
   }
 
   .journey-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 20px 40px rgba(139, 115, 85, 0.15);
   }
 
   .journey-card__link {
@@ -297,9 +291,9 @@
     height: 100%;
     background: linear-gradient(
       135deg,
-      #2d3748 0%,
-      #1e2530 50%,
-      #2d3748 100%
+      #d4c4a8 0%,
+      #c9b896 50%,
+      #d4c4a8 100%
     );
   }
 
@@ -308,8 +302,8 @@
     inset: 0;
     background: linear-gradient(
       to top,
-      rgba(24, 25, 34, 1) 0%,
-      rgba(24, 25, 34, 0.6) 40%,
+      rgba(248, 246, 243, 1) 0%,
+      rgba(248, 246, 243, 0.4) 30%,
       transparent 100%
     );
   }
@@ -329,28 +323,28 @@
     font-size: 0.75em;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: rgba(255, 255, 255, 0.5);
+    color: #6b5d4d;
   }
 
   .journey-card__title {
     font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
     font-size: 1.75em;
     font-weight: 400;
-    color: #fff;
+    color: #2d261e;
     margin: 0 0 0.25em;
     line-height: 1.2;
     transition: color 0.3s ease;
   }
 
   .journey-card:hover .journey-card__title {
-    color: #47dbb4;
+    color: #5c4d3d;
   }
 
   .journey-card__subtitle {
     font-family: Baskerville, 'Baskerville Old Face', 'Hoefler Text', Garamond, 'Times New Roman', serif;
     font-size: 1.05em;
     font-style: italic;
-    color: rgba(255, 255, 255, 0.6);
+    color: #5c4d3d;
     margin: 0 0 1em;
     line-height: 1.4;
   }
@@ -358,7 +352,7 @@
   .journey-card__countries {
     font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 0.8em;
-    color: #c75050;
+    color: #8b7355;
     letter-spacing: 0.5px;
   }
 

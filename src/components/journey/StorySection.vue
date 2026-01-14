@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import type { StorySection } from '../types'
+  import type { StorySection } from '../../types'
 
   defineProps<{
     section: StorySection
@@ -8,7 +8,7 @@
 </script>
 
 <template>
-  <section class="story-section">
+  <section class="story-section" :data-waypoint-id="section.waypointId">
     <h2 v-if="section.title">
       <span class="title-up">{{ section.title }}</span>
       <span class="title-down">{{ section.subtitle }}</span>

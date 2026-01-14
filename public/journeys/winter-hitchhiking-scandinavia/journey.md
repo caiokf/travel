@@ -3,7 +3,7 @@ id: YtQkAhyj007yqevJigD_k
 slug: winter-hitchhiking-scandinavia
 title: Frozen Thumbs, Open Doors
 subtitle: Hitchhiking Arctic Scandinavia
-description: Three weeks hitchhiking through Arctic Scandinavia in March, where a "5km" sign led to birdwatcher houses, Sámi theater buses, and strangers who became family.
+description: Three weeks hitchhiking through Arctic Scandinavia in March, where a "10km" sign led to birdwatcher houses, Sámi theater buses, and strangers who became friends.
 
 # Dates
 date-start: 2016-03-13
@@ -87,15 +87,15 @@ waypoints:
 
 # Kirkenes
 
-## The Five-Kilometer Philosophy
+## The Ten-Kilometer Philosophy
 
-The sign says "5km." That's it. Just a piece of cardboard, black marker, nothing fancy. The logic is simple: everyone on this Arctic highway is going at least five kilometers. Which means everyone can stop. Which means I'm not asking for much. Which means the barrier disappears.
+The sign says "10km." That's it. Just a piece of cardboard, black marker, nothing fancy. The logic is simple: everyone on this Arctic highway is going at least five kilometers. Which means everyone can stop. Which means I'm not asking for much. Which means the barrier disappears.
 
 I've been working here as a tour guide—dog sledding, northern lights, the whole package. Good money, warm beds, predictable days. But the season is winding down, and something in me needs to move.
 
 A car pulls over within ten minutes.
 
-"Five kilometers?" The driver looks confused. "Where are you actually going?"
+"Ten kilometers?" The driver looks confused. "Where are you actually going?"
 
 "I actually don't have anywhere to go," I tell him. "As you're driving, we'll see if there's anything interesting."
 
@@ -179,6 +179,10 @@ They put me to work. Cables, speakers, the geometry of light. Afterward, they ta
 
 The play that evening is beautiful—part Sami language, part breakdance, part something I don't have words for. Art that doesn't need translation.
 
+![stage setup](/journeys/winter-hitchhiking-scandinavia/img-theater-stage.jpeg)
+
+![and the play](/journeys/winter-hitchhiking-scandinavia/img-theater-play.jpeg)
+
 ---
 
 <!-- waypoint: kautokeino -->
@@ -191,13 +195,15 @@ Without a plan, I plan to stop in Alta. Seems a reasonable stop along the way ba
 
 "This is the best time of year for Kautokeino," he says. "There is our annual Sami festival. You should come. Stay at my house."
 
+![kautokeino](/journeys/winter-hitchhiking-scandinavia/img-kautokeino.jpg)
+
 His mother and brother live there. The brother takes one look at me.
 
 "Why did you bring some homeless guy from the street into the house?"
 
 Fair question. I offer to leave, continue hitchhiking. My friend insists I stay. "He'll warm up."
 
-He does. After a day or two of shared meals, something shifts. By the end, the brother and I are closer than my original host and I ever were. Skepticism transformed into something like family.
+He does. After a day or two of shared meals, something shifts. By the end, the brother and I are closer than my original host and I ever were. Skepticism transformed into something like friendship.
 
 The festival is seven days away. To pass time, I help at his mother's cafe—a one-woman operation where the dishes pile up all day. I spend hours at the sink, meditating to music, scrubbing plates. By closing time, everything is clean.
 
@@ -213,6 +219,8 @@ I spend ten hours setting up the concert stage. Free lunch. New friends. Lessons
 
 In exchange: a festival pass.
 
+![reindeer race](/journeys/winter-hitchhiking-scandinavia/img-reindeer-race.jpg)
+
 My friend lends me a Sami costume to wear. The moment I step outside, everyone notices I don't belong. Which means everyone wants to talk. Where are you from? How did you end up here? Every second person hands me a beer. I accumulate so many I start redistributing them to strangers.
 
 "Here. Beer for you."
@@ -226,6 +234,8 @@ I talk him down. "Go to sleep. Let things settle. Decide tomorrow when you're cl
 The next morning, he thanks me. He wanted to stay with her. He just needed someone to say wait, I guess.
 
 When I finally leave, both brothers try to give me everything they think I need. Food. T-shirts. Socks. I wonder what that says. I refuse most of it, not all. We hug. Goodbye.
+
+![on the road](/journeys/winter-hitchhiking-scandinavia/img-on-the-road.jpg)
 
 ---
 
@@ -247,6 +257,8 @@ _This section awaits the telling. What happened between Kautokeino and the Swedi
 
 _This section awaits the telling. The border town where Sweden meets Finland, where the Gulf of Bothnia narrows. What rides, what conversations, what small kindnesses happened here? The story remains to be uncovered._
 
+![camping near a bunker](/journeys/winter-hitchhiking-scandinavia/img-camping-bunker.jpg)
+
 ---
 
 <!-- waypoint: rovaniemi -->
@@ -259,7 +271,7 @@ _This section awaits the telling. The "official" Arctic Circle, Santa Claus Vill
 
 ---
 
-The 5km sign is still in my bag, slightly more battered now. It doesn't promise a destination. It promises a direction. That's enough.
+The 10km sign is still in my bag, slightly more battered now. It doesn't promise a destination. It promises a direction. That's enough.
 
 What I'm learning: vulnerability opens doors. Not just passing through places but being _with_ people—memorizing their names, washing their dishes, setting up their stages. Showing up. Offering something. Receiving what's given.
 
