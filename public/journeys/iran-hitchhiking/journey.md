@@ -3,12 +3,12 @@ id: wRScMVh_L-JDmGPnlW6ou
 slug: iran-hitchhiking
 title: Thumbs Up in Persia
 subtitle: Hitchhiking Through Iran
-description: Three weeks hitchhiking across Iran, where every ride came with tea, every host with a feast, and the hospitality shattered every preconception.
+description: Two weeks hitchhiking across Iran, where open doors and endless tea revealed the warmth behind the headlines.
 
 # Dates
 date-start: 2017-10-08
-date-end: 2017-10-15
-duration: 8 days
+date-end: 2017-10-20
+duration: 12 days
 
 # Geography
 countries: [Iran]
@@ -163,11 +163,31 @@ Every evening, we walk the bridges over the Zayandeh River. Families picnic on t
 
 # Ghoortan Citadel
 
+## Mud and Time
+
+A detour from the main road leads to Ghoortan—an ancient citadel rising from the plains like a sandcastle that forgot to crumble. The walls are mud-brick, baked by centuries of sun. Inside, a maze of passages and chambers, all empty now except for the wind.
+
+A local family spots us wandering and insists we join them for lunch in the shade of the walls. More tea. More questions about where we're from and why we're here.
+
+The hospitality continues even here. A family invites me to share their picnic lunch among the ruins. We can barely communicate, but the food speaks clearly: rice, kebab, yogurt, fresh bread.
+
+![Iranian hospitality](/journeys/iran-hitchhiking/img-hospitality.webp)
+
+![More hospitality](/journeys/iran-hitchhiking/img-hospitality-2.webp)
+
+![And more](/journeys/iran-hitchhiking/img-hospitality-3.webp)
+
 ---
 
 <!-- waypoint: salt-lake -->
 
 # Salt Lake
+
+## White Horizon
+
+The salt lake stretches to the horizon, blindingly white under the midday sun. We walk out onto the crust, the ground crunching underfoot. In every direction, nothing but white meeting blue.
+
+It's disorienting—no landmarks, no scale. Just you and the sky and the salt.
 
 ---
 
@@ -175,11 +195,25 @@ Every evening, we walk the bridges over the Zayandeh River. Families picnic on t
 
 # Varzaneh Desert
 
+## Dunes at Dusk
+
+The Varzaneh dunes glow orange as the sun drops. We camp here, spreading blankets on the sand. No tents needed—the night is warm and the stars are too good to miss.
+
+In the morning, the sand holds the cold of the night. We watch the light change, drink tea, and delay leaving as long as possible.
+
+![The desert road](/journeys/iran-hitchhiking/img-desert.webp)
+
 ---
 
 <!-- waypoint: kerman -->
 
 # Kerman
+
+## Transit Point
+
+Kerman is a transit point—a place to sleep before heading deeper into the desert. The bazaar is quieter than Isfahan's, the pace slower. A carpet seller invites us for tea and tells us about the deserts to the south.
+
+"You're going to Kalout? You'll see—it's another planet."
 
 ---
 
@@ -187,17 +221,35 @@ Every evening, we walk the bridges over the Zayandeh River. Families picnic on t
 
 # Rayen
 
+## The Forgotten Castle
+
+Rayen Castle stands as a smaller echo of Bam—the same mud-brick construction, the same layered history, but without the crowds. Earthquake damage shows in the walls, but much remains intact.
+
+We climb to the highest point and look out over the valley. Mountains frame the horizon. Somewhere beyond them, the desert waits.
+
 ---
 
 <!-- waypoint: coloured-mountains -->
 
 # Coloured Mountains
 
+## Painted Earth
+
+The mountains here look fake—bands of red, orange, yellow, and grey striped across the slopes like someone dragged a paintbrush through wet clay. Minerals, the driver explains. Iron, copper, sulfur.
+
+We stop the car and walk closer. The colors don't fade with proximity. If anything, they intensify.
+
 ---
 
 <!-- waypoint: kalout-desert -->
 
 # Kalout Desert
+
+## Martian Landscape
+
+The Kaluts are what happens when wind carves rock for millennia. Towers and ridges and shapes that have no name, all sculpted from the same sandy stone. The scale is impossible to judge—what looks close is far, what looks small is massive.
+
+We drive through at sunset. The shadows stretch. The formations turn from tan to gold to deep orange. It feels less like Iran and more like another planet entirely.
 
 ---
 
@@ -241,18 +293,8 @@ I spend hours wandering the columns and reliefs. Delegations from across the anc
 
 ![Details in stone](/journeys/iran-hitchhiking/img-persepolis-2.webp)
 
-The hospitality continues even here. A family invites me to share their picnic lunch among the ruins. We can barely communicate, but the food speaks clearly: rice, kebab, yogurt, fresh bread.
-
-![Iranian hospitality](/journeys/iran-hitchhiking/img-hospitality.webp)
-
-![More hospitality](/journeys/iran-hitchhiking/img-hospitality-2.webp)
-
-![And more](/journeys/iran-hitchhiking/img-hospitality-3.webp)
-
 ---
 
 Three weeks of thumbs up and open doors. The math doesn't make sense: a country under sanctions, isolated by politics, yet more welcoming than anywhere I've been.
 
 Every preconception shattered. Every warning proved wrong. Iran taught me to trust my own eyes over headlines.
-
-![The desert road](/journeys/iran-hitchhiking/img-desert.webp)
