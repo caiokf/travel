@@ -224,7 +224,7 @@ function parseStoryContent(
   let currentSubtitle: string | undefined
 
   // Split by waypoint markers
-  const waypointRegex = /<!--\s*waypoint:\s*(\w+)\s*-->/g
+  const waypointRegex = /<!--\s*waypoint:\s*([\w-]+)\s*-->/g
   const parts = body.split(waypointRegex)
 
   // parts will be: [content before first marker, waypointId1, content1, waypointId2, content2, ...]
