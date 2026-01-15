@@ -140,6 +140,7 @@
                 />
                 <div class="journey-card__placeholder" v-else></div>
                 <div class="journey-card__gradient"></div>
+                <span v-if="trip.status === 'in-progress'" class="journey-card__badge">In Progress</span>
 
                 <div class="journey-card__content">
                   <div class="journey-card__meta">
@@ -306,6 +307,22 @@
       rgba(45, 38, 30, 0.5) 40%,
       transparent 100%
     );
+  }
+
+  .journey-card__badge {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    padding: 0.4em 0.8em;
+    background: rgba(139, 115, 85, 0.9);
+    color: #fff;
+    font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.7em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    z-index: 3;
   }
 
   .journey-card__content {
