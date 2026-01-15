@@ -1,9 +1,9 @@
 ---
-name: creating-journeys
+name: writing-journeys
 description: Use when user wants to write about a journey or trip they took - interviews them for vivid details and stories, then delegates to Writer agent to create markdown file with proper frontmatter and waypoint structure
 ---
 
-# Creating Journeys
+# Writing Journeys
 
 ## Overview
 
