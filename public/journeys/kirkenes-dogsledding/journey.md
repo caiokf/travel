@@ -61,11 +61,11 @@ Kirkenes sits at the edge of everything. Russia is a few kilometers east. Finlan
 
 I came here to work as a dog sledding guide. The job posting was vague: "Help needed with huskies. Room and board included." What it didn't mention was the 4am wake-ups, the frozen fingers, the forty dogs who would become family.
 
-![The home base](/journeys/kirkenes-dogsledding/img-home-view.jpg)
+![The home base](/journeys/kirkenes-dogsledding/img-home-view.webp)
 
 The first week is brutal. Learning to read the dogs, to anticipate which ones will fight, which ones will slack, which ones will run until their hearts give out if you let them. Each has a personality. Each demands respect.
 
-![Dogs ready for a run](/journeys/kirkenes-dogsledding/img-dogs-ready-to-go.jpg)
+![Dogs ready for a run](/journeys/kirkenes-dogsledding/img-dogs-ready-to-go.webp)
 
 ---
 
@@ -77,11 +77,11 @@ The first week is brutal. Learning to read the dogs, to anticipate which ones wi
 
 The Pasvik Valley runs along the Russian border, a corridor of frozen lakes and birch forest. This is where we take the longer expeditions—overnight trips with tourists who want more than a two-hour taste.
 
-![On the trail](/journeys/kirkenes-dogsledding/img-dogsledding.jpg)
+![On the trail](/journeys/kirkenes-dogsledding/img-dogsledding.webp)
 
 Camping with the dogs changes everything. They curl into the snow, noses tucked under tails, perfectly content in temperatures that would kill an unprepared human in hours. We sleep in lavvu tents, traditional Sami shelters, the fire crackling through the night.
 
-![Camping with the pack](/journeys/kirkenes-dogsledding/img-camping-with-dogs.jpg)
+![Camping with the pack](/journeys/kirkenes-dogsledding/img-camping-with-dogs.webp)
 
 The tourists ask the same questions. How do you train them? Don't they get cold? What do you feed them? But the real education happens in silence—watching the lead dog navigate, feeling the sled respond to weight shifts, learning when to brake and when to trust.
 
@@ -95,15 +95,15 @@ The tourists ask the same questions. How do you train them? Don't they get cold?
 
 The easternmost point in Norway. A small church marks the border, and beyond it, Russia stretches endlessly. We bring groups here on clear nights, hoping for northern lights.
 
-![The backyard view](/journeys/kirkenes-dogsledding/img-backyard.jpg)
+![The backyard view](/journeys/kirkenes-dogsledding/img-backyard.webp)
 
 Some nights deliver. The sky erupts in green curtains, shifting and pulsing like something alive. The dogs howl. The tourists gasp. I've seen it dozens of times now, and it still stops me cold.
 
-![Skiing between runs](/journeys/kirkenes-dogsledding/img-skiing.jpg)
+![Skiing between runs](/journeys/kirkenes-dogsledding/img-skiing.webp)
 
 Other nights, we wait in vain, drinking tea from thermoses, telling stories to fill the darkness. Those nights matter too. Not everything has to be spectacular to be meaningful.
 
-![Moving through the landscape](/journeys/kirkenes-dogsledding/img-moving-around.jpg)
+![Moving through the landscape](/journeys/kirkenes-dogsledding/img-moving-around.webp)
 
 ---
 
@@ -111,4 +111,4 @@ Two months of frozen mornings and tired muscles. Two months of learning a langua
 
 When I leave, the hardest goodbye isn't to the people. It's to a lead dog named Storm who taught me more about trust than any human ever has.
 
-![One of my favorites](/journeys/kirkenes-dogsledding/img-one-of-my-favourites.jpg)
+![One of my favorites](/journeys/kirkenes-dogsledding/img-one-of-my-favourites.webp)

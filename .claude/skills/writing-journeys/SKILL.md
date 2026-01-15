@@ -11,9 +11,11 @@ Create markdown journey files through deep interviewing. Probe for vivid details
 
 Journey files live in `public/journeys/[slug]/` folders containing:
 - `journey.md` - the journey markdown file
-- `hero.png` - hero image for the header
-- `thumbnail.png` - thumbnail for the timeline
+- `hero.webp` - hero image for the header
+- `thumbnail.webp` - thumbnail for the timeline
 - `route.json` - pre-generated road routes (created with `/generate-route` skill)
+
+**Note:** Add source images as jpg/png, then run `/convert-images [slug]` to optimize to webp format.
 
 ## Process
 
@@ -203,9 +205,9 @@ Next section...
 
 All images for a journey go in the journey folder: `public/journeys/[slug]/`
 
-Required images:
-- `hero.png` - Hero header background (1920x1080 recommended)
-- `thumbnail.png` - Timeline card thumbnail (800x600 recommended)
+Required images (after conversion with `/convert-images`):
+- `hero.webp` - Hero header background (source: 1920x1080 recommended)
+- `thumbnail.webp` - Timeline card thumbnail (source: 800x600 recommended)
 
 Optional waypoint images:
 - `[waypoint-id].jpg` - Images for specific waypoints
@@ -228,16 +230,17 @@ All journeys go in `public/journeys/[slug]/` with this structure:
 
 ```
 public/journeys/winter-hitchhiking-scandinavia/
-├── journey.md      # The markdown file
-├── hero.png        # Hero image (1920x1080 recommended)
-├── thumbnail.png   # Timeline thumbnail (800x600 recommended)
-└── route.json      # Generated with /generate-route skill
+├── journey.md       # The markdown file
+├── hero.webp        # Hero image (optimized)
+├── thumbnail.webp   # Timeline thumbnail (optimized)
+└── route.json       # Generated with /generate-route skill
 ```
 
 ## After Creating a Journey
 
 1. Create the folder: `mkdir -p public/journeys/[slug]`
 2. Save the markdown as `journey.md` in the folder
-3. Add hero.png and thumbnail.png images
-4. Run `/generate-route [slug]` to create route.json
-5. Add the slug to `JOURNEY_SLUGS` array in `src/services/journeyService.ts`
+3. Add hero and thumbnail images (any format: jpg/png)
+4. Run `/convert-images [slug]` to optimize images to webp
+5. Run `/generate-route [slug]` to create route.json
+6. Add the slug to `JOURNEY_SLUGS` array in `src/services/journeyService.ts`

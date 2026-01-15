@@ -121,7 +121,7 @@ I stay three nights. Evenings pass by headlamp, reading my Kindle, eating discou
 
 One afternoon I bump into tourists I'd guided on a dog sledding tour days earlier, back when I was working in Kirkenes. They're on a coastal cruise now, seeing the Arctic from the comfortable side. We laugh at the improbability. The world up here is very small.
 
-![vardo](/journeys/winter-hitchhiking-scandinavia/img-vardo.png)
+![vardo](/journeys/winter-hitchhiking-scandinavia/img-vardo.webp)
 
 ---
 
@@ -181,9 +181,9 @@ They put me to work. Cables, speakers, the geometry of light. Afterward, they ta
 
 The play that evening is beautiful—part Sami language, part breakdance, part something I don't have words for. Art that doesn't need translation.
 
-![stage setup](/journeys/winter-hitchhiking-scandinavia/img-theater-stage.jpeg)
+![stage setup](/journeys/winter-hitchhiking-scandinavia/img-theater-stage.webp)
 
-![and the play](/journeys/winter-hitchhiking-scandinavia/img-theater-play.jpeg)
+![and the play](/journeys/winter-hitchhiking-scandinavia/img-theater-play.webp)
 
 ---
 
@@ -197,7 +197,7 @@ Without a plan, I plan to stop in Alta. Seems a reasonable stop along the way ba
 
 "This is the best time of year for Kautokeino," he says. "There is our annual Sami festival. You should come. Stay at my house."
 
-![kautokeino](/journeys/winter-hitchhiking-scandinavia/img-kautokeino.jpg)
+![kautokeino](/journeys/winter-hitchhiking-scandinavia/img-kautokeino.webp)
 
 His mother and brother live there. The brother takes one look at me.
 
@@ -221,7 +221,7 @@ I spend ten hours setting up the concert stage. Free lunch. New friends. Lessons
 
 In exchange: a festival pass.
 
-![reindeer race](/journeys/winter-hitchhiking-scandinavia/img-reindeer-race.jpg)
+![reindeer race](/journeys/winter-hitchhiking-scandinavia/img-reindeer-race.webp)
 
 My friend lends me a Sami costume to wear. The moment I step outside, everyone notices I don't belong. Which means everyone wants to talk. Where are you from? How did you end up here? Every second person hands me a beer. I accumulate so many I start redistributing them to strangers.
 
@@ -237,7 +237,7 @@ The next morning, he thanks me. He wanted to stay with her. He just needed someo
 
 When I finally leave, both brothers try to give me everything they think I need. Food. T-shirts. Socks. I wonder what that says. I refuse most of it, not all. We hug. Goodbye.
 
-![on the road](/journeys/winter-hitchhiking-scandinavia/img-on-the-road.jpg)
+![on the road](/journeys/winter-hitchhiking-scandinavia/img-on-the-road.webp)
 
 ---
 
@@ -259,7 +259,7 @@ _This section awaits the telling. What happened between Kautokeino and the Swedi
 
 _This section awaits the telling. The border town where Sweden meets Finland, where the Gulf of Bothnia narrows. What rides, what conversations, what small kindnesses happened here? The story remains to be uncovered._
 
-![camping near a bunker](/journeys/winter-hitchhiking-scandinavia/img-camping-bunker.jpg)
+![camping near a bunker](/journeys/winter-hitchhiking-scandinavia/img-camping-bunker.webp)
 
 ---
 
