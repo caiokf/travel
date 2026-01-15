@@ -15,7 +15,7 @@ countries: [Norway, Sweden, Finland]
 distance: ~1200 km
 
 # Display
-status: in-progress
+status: completed
 
 # Tags
 tags: [hitchhiking, winter, arctic, sami, scandinavia]
@@ -245,9 +245,35 @@ When I finally leave, both brothers try to give me everything they think I need.
 
 # Jokkmokk
 
-## [Story not yet gathered]
+## The Interview from Nowhere
 
-_This section awaits the telling. What happened between Kautokeino and the Swedish Arctic? The road south through Sami country, crossing into Sweden, arriving at Jokkmokk—the old market town just above the Arctic Circle. The temperature climbs to four degrees. Spring is coming._
+A pleasant lady picks me up outside Kautokeino. The usual conversation.
+
+"Where are you going?"
+
+"Ten kilometers."
+
+"No, but really. Where?"
+
+"I genuinely don't know. Where are you going?"
+
+"Jokkmokk. It's in Sweden."
+
+"That sounds lovely."
+
+She laughs. By the time we cross the border, she's offered me her spare room. I've stopped being surprised by this, but forever grateful. Somewhere along the way, strangers inviting me home.
+
+I stay two nights. The first evening, I cook her dinner—blue cheese and spinach risotto, my go-to recipe when I want to say thank you without saying thank you. She's genuinely moved. It's just risotto, I want to tell her. But I don't. Some gestures are better left simple.
+
+The second day, I sit in the Jokkmokk public library, preparing for a job interview. A US startup. They don't know I'm calling from above the Arctic Circle. They don't know I've been sleeping in strangers' houses and abandoned bird-watching towers for two weeks. They just know I showed up prepared.
+
+She lets me do the interview at her house. Good wifi. Quiet room. I sit at her kitchen table in borrowed warmth, talking about software with people in San Francisco.
+
+I get the job.
+
+Later, I walk through town. Snow still heavy on the rooftops, but the air has shifted. Four degrees. Almost warm. Spring creeping in at the edges.
+
+We're still friends on Facebook. I don't know why that detail matters, but it does.
 
 ---
 
@@ -255,11 +281,71 @@ _This section awaits the telling. What happened between Kautokeino and the Swedi
 
 # Haparanda
 
-## [Story not yet gathered]
+## Five Hours and a Stranger's Detour
 
-_This section awaits the telling. The border town where Sweden meets Finland, where the Gulf of Bothnia narrows. What rides, what conversations, what small kindnesses happened here? The story remains to be uncovered._
+The ride from Jokkmokk follows the usual pattern. We talk about life. What am I doing out here? How's the trip been? I tell him the stories. He listens.
+
+Around noon, he asks if I've eaten.
+
+"Not yet. My body's used to it by now. The trip takes me where it takes me. And so far today, I rather use my time to get moving."
+
+He pulls into a restaurant. "Good timing. Join me for lunch?"
+
+I sit down, grateful. He waves the waiter my direction and I order something simple. The waiter looks at him. He waves him away.
+
+"What about you? What are you having?"
+
+"I've eaten. I'm just here for you."
+
+I don't know what to say. The kindness of some people.
+
+Haparanda is bigger than the villages I've passed through. A proper town. I get dropped near the police station and consider, briefly, asking for a cell. Swedish police offer them to travelers sometimes—a warm floor, a locked door, the strange hospitality of institutional kindness. Or so I heard from other travellers. I decided not to find out.
+
+I've spotted something better. An abandoned bunker by the shore. Quiet. A view. I pitch my tent as the temperature drops.
 
 ![camping near a bunker](/journeys/winter-hitchhiking-scandinavia/img-camping-bunker.webp)
+
+Morning comes cold. My fingers don't cooperate with the tent poles. I sleep in—eight o'clock, practically midday by my standards—and walk to the road.
+
+Then I wait.
+
+One hour. Two hours. Three.
+
+People slow down, roll down windows. "Just take the bus," they say. I shake my head. Four hours. The longest I've waited this entire trip has been fifteen minutes. My luck, I think, has finally run out.
+
+Five hours.
+
+A car stops. The driver looks at my sign and waves me in.
+
+We had a brief chat, the usual came out: "Ten kilometers. Where are you really going?"
+
+"Rovaniemi. Eventually. It's far, 10km would do me wonders. Five hundred meters that way gets me 500m closer."
+
+Rovaniemi would be an hour and a half away. Maybe more. I would have to go twenty-five kilometers, turn left, then another hundred.
+
+"Nice. I'll take you there."... Ok, maybe my luck is back.
+
+On the drive, we talk about everything. Life, work, what comes next. He's just lost his job. He's figuring things out. So am I, I tell him. We're both in transition, both heading somewhere we can't quite see yet.
+
+Near Rovaniemi, he pulls into a parking lot. "Pizza?" We eat. He shows me a museum. Big exhibition about bugs. Hours pass.
+
+Then, almost as an afterthought, I ask what his plans were, since he spent a big part of his day with me. "What are your plans in Rovaniemi?"
+
+"You know, I live a few blocks from where I picked you up."
+
+I don't understand.
+
+"I was driving home. I saw you from the other side of the road. Saw your sign. Wondered what you were doing there."
+
+He could have driven past. Gone home. Sat in his apartment.
+
+"When you said Rovaniemi, I thought—why don't I just drive him there? What else am I doing today?"
+
+I don't know what to say. Five hours of waiting, and the person who stopped wasn't even going my direction. He just decided to.
+
+We shake hands outside the city center. I watch him drive away, back the way we came. Three hours round trip for a stranger with a cardboard sign.
+
+Some kindnesses you carry with you. This one I'm still carrying.
 
 ---
 
@@ -267,9 +353,33 @@ _This section awaits the telling. The border town where Sweden meets Finland, wh
 
 # Rovaniemi
 
-## [Story not yet gathered]
+## The Last Ride
 
-_This section awaits the telling. The "official" Arctic Circle, Santa Claus Village, the end of the road. How did nineteen days of frozen thumbs and open doors conclude? What was the final ride, the last conversation, the moment of return?_
+My Couchsurfing host has no furniture.
+
+Not in the minimalist-aesthetic way. Just—nothing. A carpet in the living room. That's it. We sit cross-legged on the floor and eat together, passing dishes back and forth like some kind of accidental ceremony.
+
+It's beautiful.
+
+I sleep on my mat, same as I have for weeks. But tonight there's a roof, and someone chose to share their space with me. That's different.
+
+The next day, he invites me to something unexpected. His girlfriend is trying something for the first time—he's done it before, wants to be there for her. They're going to the forest.
+
+I'm honored he trusts me enough to be present. We build a fire, walk among the trees, sit in silence that doesn't need filling. Hours pass in a way that doesn't feel like hours.
+
+Later, back at the house, we share food again. Talk about everything and nothing. The kind of conversation that happens when guards are down and time has stopped mattering.
+
+The next morning, I pack my bag.
+
+Rovaniemi is the last place I hitchhike to. The job starts soon—the one I interviewed for from a stranger's kitchen in Jokkmokk. Real life is calling. I need to be somewhere specific, at a specific time.
+
+I take a bus.
+
+It feels strange, paying for transport. Sitting in an assigned seat. Moving at someone else's schedule. But the 10km sign stays in my bag. Battered now, edges soft from handling.
+
+Three weeks. I've lost count of the strangers who became something more.
+
+The road doesn't end. You just stop walking it for a while.
 
 ---
 
