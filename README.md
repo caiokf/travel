@@ -1,5 +1,41 @@
-# Vue 3 + TypeScript + Vite
+```
+     ╔═══════════════════════════════════════════╗
+     ║                                           ║
+     ║   ╺┳╸┏━┓┏━┓╻ ╻┏━╸╻                       ║
+     ║    ┃ ┣┳┛┣━┫┃╻┃┣╸ ┃                       ║
+     ║    ╹ ╹┗╸╹ ╹┗┻┛┗━╸┗━╸                     ║
+     ║                                           ║
+     ║   interactive travel storytelling          ║
+     ╚═══════════════════════════════════════════╝
+```
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+# Travel
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+Interactive storytelling app for documenting travel adventures — combining D3.js map visualizations with markdown-driven narratives.
+
+## Features
+
+- **Interactive Maps** — D3.js + TopoJSON world map with animated travel routes and location markers
+- **Story-driven** — Each journey is a markdown narrative with photos, rendered inline alongside the map
+- **Journey Browser** — Homepage with journey cards linking to full story views
+- **Responsive** — Adapts map and content layout across devices
+
+## Tech Stack
+
+- Vue 3 + TypeScript + Composition API
+- D3.js + TopoJSON for map rendering
+- Marked for markdown content
+- Vue Router for navigation
+- Vite for build tooling
+- Sharp for image optimization
+
+## Development
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## License
+
+MIT
